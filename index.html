@@ -1781,7 +1781,7 @@
       top: calc(16px + env(safe-area-inset-top, 0px));
       left: 50%;
       transform: translateX(-50%);
-      z-index: 80;
+      z-index: 105;
       width: calc(100% - 32px);
       max-width: 420px;
       pointer-events: none;
@@ -1852,6 +1852,124 @@
       align-items: center;
       justify-content: center;
     }
+
+    /* ==================== MÀN HÌNH KHÓA MÃ PIN NỘI BỘ NHÂN VIÊN ==================== */
+    .pin-lock-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 95;
+      background: radial-gradient(circle at 50% 15%, rgba(212, 175, 55, 0.16), transparent 55%),
+                  #07070A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+      overflow-y: auto;
+    }
+
+    .pin-lock-card {
+      width: 100%;
+      max-width: 380px;
+      background: rgba(20, 20, 24, 0.94);
+      border: 1px solid var(--gold-border);
+      border-radius: 24px;
+      padding: 24px 20px 22px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.9), var(--shadow-gold);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center;
+    }
+
+    .pin-dots-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      min-height: 24px;
+      padding: 6px 14px;
+      border-radius: 99px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+    }
+
+    .pin-dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      border: 2px solid #52525B;
+      background: transparent;
+      transition: all 0.15s ease;
+    }
+
+    .pin-dot.filled {
+      border-color: var(--gold-light);
+      background: var(--gold-light);
+      box-shadow: 0 0 10px rgba(245, 208, 97, 0.65);
+      transform: scale(1.1);
+    }
+
+    .pin-dots-row.shake {
+      animation: pinShake 0.36s ease;
+      border-color: var(--rose);
+    }
+
+    @keyframes pinShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(6px); }
+    }
+
+    .pin-keypad {
+      width: 100%;
+      max-width: 280px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .pin-key {
+      height: 60px;
+      border-radius: 16px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-size: 22px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      transition: transform 0.1s ease, background-color 0.12s ease, border-color 0.12s ease;
+    }
+
+    .pin-key:active {
+      transform: scale(0.93);
+      background: var(--gold-tint);
+      border-color: var(--gold);
+      color: var(--gold-light);
+    }
+
+    .pin-key.key-fn {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      background: var(--bg-elevated);
+    }
+
+    .staff-pin-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 9px 11px;
+      border-radius: 11px;
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+    }
   </style>
 </head>
 
@@ -1896,6 +2014,12 @@
         </div>
 
         <div class="header-actions">
+          <button type="button" id="btnLockAppNow" class="icon-btn hidden" title="Khóa màn hình ngay" aria-label="Khóa ứng dụng">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </button>
           <button type="button" id="btnOpenAppearance" class="icon-btn admin-only" title="Đổi nền & Ảnh phòng" aria-label="Giao diện & Hình ảnh">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -2557,7 +2681,7 @@
       <div class="segmented-tabs cols-3" style="margin-bottom:14px;">
         <button type="button" class="seg-tab-btn active" data-set-tab="setPanelBrand">Thương hiệu &amp; PT</button>
         <button type="button" class="seg-tab-btn" data-set-tab="setPanelBg">Nền App &amp; Banner</button>
-        <button type="button" class="seg-tab-btn" data-set-tab="setPanelBackup">Máy chủ &amp; Backup</button>
+        <button type="button" class="seg-tab-btn" data-set-tab="setPanelBackup">Bảo mật &amp; Sync</button>
       </div>
 
       <!-- PANEL 1: THƯƠNG HIỆU, LOGO & HỒ SƠ PT -->
@@ -2658,46 +2782,85 @@
         <!-- Chọn màu nền tự do -->
         <div class="color-picker-row">
           <div>
-            <div style="font-size:12.5px;font-weight:700;color:var(--text-primary);">Tự chọn màu nền riêng</div>
-            <div id="customColorHexText" style="font-size:11px;color:var(--text-secondary);">#0A0A0C</div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--text-primary);">Màu nền tùy chỉnh</div>
+            <div id="customColorHexText" style="font-size:11px;color:var(--gold-light);font-weight:700;">#0A0A0C</div>
           </div>
           <input id="inputCustomBgColor" type="color" value="#0A0A0C" aria-label="Chọn màu nền tùy chỉnh" />
         </div>
 
-        <!-- Chèn ảnh làm hình nền App -->
+        <!-- Chèn ảnh nền cho App -->
         <div class="photo-upload-box stack-xs">
-          <div style="font-size:12px;font-weight:700;color:var(--gold-light);">Hoặc chèn ảnh làm Background toàn App</div>
-          <img id="previewBgImg" class="photo-preview-thumb hidden" style="height:104px;" alt="Ảnh nền app" />
-          <div style="display:flex;gap:8px;justify-content:center;">
+          <img id="previewBgImg" class="photo-preview-thumb hidden" style="height:110px;margin-bottom:0;" alt="Xem trước ảnh nền App" />
+          <div style="font-size:12px;font-weight:700;color:var(--gold-light);">Hoặc dùng hình ảnh làm nền App</div>
+          <div style="display:flex;gap:6px;justify-content:center;">
             <label class="btn btn-outline-gold btn-sm" style="cursor:pointer;">
-              📷 Chọn ảnh nền
+              🖼️ Chọn ảnh nền
               <input id="fileBgPhoto" type="file" accept="image/*" class="hidden" />
             </label>
             <button type="button" id="btnClearBgPhoto" class="btn btn-danger btn-sm hidden">Gỡ ảnh nền</button>
           </div>
+        </div>
 
-          <!-- Điều chỉnh độ tối lớp phủ và độ mờ ảnh nền -->
-          <div id="bgImageControls" class="stack-xs hidden" style="text-align:left;margin-top:8px;padding-top:8px;border-top:1px solid var(--border-soft);">
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;">
-                <span style="color:var(--text-secondary);">Độ tối lớp phủ (giúp rõ chữ)</span>
-                <span id="bgOverlayValText" style="color:var(--gold-light);">72%</span>
-              </div>
-              <input id="sliderBgOverlay" type="range" min="35" max="92" step="1" value="72" style="margin:6px 0 2px;" />
+        <!-- Điều chỉnh độ tối & độ mờ khi dùng ảnh nền -->
+        <div id="bgImageControls" class="slider-box stack-xs hidden">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;">
+              <span>Độ tối lớp phủ (giúp dễ đọc chữ)</span>
+              <span id="bgOverlayValText" class="badge badge-gold">72%</span>
             </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;">
-                <span style="color:var(--text-secondary);">Độ mờ nền (Blur)</span>
-                <span id="bgBlurValText" style="color:var(--gold-light);">2px</span>
-              </div>
-              <input id="sliderBgBlur" type="range" min="0" max="12" step="1" value="2" style="margin:6px 0 2px;" />
+            <input id="sliderBgOverlay" type="range" min="35" max="92" step="1" value="72" />
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;">
+              <span>Độ mờ ảnh nền (Blur)</span>
+              <span id="bgBlurValText" class="badge badge-neutral">2px</span>
             </div>
+            <input id="sliderBgBlur" type="range" min="0" max="12" step="1" value="2" />
           </div>
         </div>
       </div>
 
-      <!-- PANEL 3: ĐỒNG BỘ MÁY CHỦ & SAO LƯU -->
+      <!-- PANEL 3: BẢO MẬT MÃ PIN, ĐỒNG BỘ MÁY CHỦ & SAO LƯU -->
       <div id="setPanelBackup" class="stack-sm hidden">
+        <!-- Quản lý Khóa Mã PIN nội bộ cho nhân viên -->
+        <div class="slider-box stack-xs" style="border-color:var(--gold-border);">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <div>
+              <div style="font-size:12px;font-weight:800;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.5px;">🔒 Khóa Mã PIN Nhân Viên</div>
+              <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Chỉ người có mã PIN mới mở được app &amp; tự gắn tên PT</div>
+            </div>
+            <button type="button" id="btnTogglePinLock" class="switch-btn" role="switch" aria-checked="false" aria-label="Bật tắt khóa mã PIN"></button>
+          </div>
+
+          <div id="pinLockStatusRow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px;">
+            <span id="pinLockStatusBadge" class="badge badge-neutral">Đang tắt</span>
+            <button type="button" id="btnLockFromSettings" class="btn btn-subtle btn-sm hidden" style="min-height:30px;padding:3px 10px;font-size:11px;">🔒 Khóa ngay</button>
+          </div>
+
+          <div id="pinAdminOnlyNotice" class="warning-box hidden" style="margin-top:4px;font-size:11.5px;">
+            <span>Bạn đang đăng nhập bằng mã <strong>Nhân viên</strong>. Chỉ <strong>Quản trị viên (Chủ phòng)</strong> mới có quyền bật/tắt hoặc sửa danh sách mã PIN.</span>
+          </div>
+
+          <div id="pinManagerWrap" class="stack-xs" style="margin-top:4px;">
+            <div id="staffPinList" class="stack-xs"></div>
+
+            <form id="addStaffPinForm" class="stack-xs" style="padding-top:8px;border-top:1px solid var(--border-soft);">
+              <div style="font-size:11.5px;font-weight:700;color:var(--text-primary);">Thêm / Cấp mã PIN nhân viên mới</div>
+              <div class="grid-2">
+                <input id="newStaffName" type="text" class="text-input" maxlength="35" placeholder="Tên (VD: HLV Duy)" style="padding:9px 10px;font-size:12.5px;" required />
+                <select id="newStaffRole" class="select-input" style="padding:9px 10px;font-size:12.5px;">
+                  <option value="admin">Quản trị (Chủ)</option>
+                  <option value="staff">Nhân viên / PT</option>
+                </select>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <input id="newStaffPin" type="password" inputmode="numeric" pattern="[0-9]{4,6}" maxlength="6" class="text-input" placeholder="Mã PIN (4–6 số)" style="padding:9px 10px;font-size:13px;letter-spacing:3px;" required />
+                <button type="submit" class="btn btn-gold btn-sm" style="flex-shrink:0;">+ Cấp PIN</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
         <!-- Trạng thái máy chủ thời gian thực -->
         <div class="slider-box stack-xs">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
@@ -2963,6 +3126,59 @@
     <button type="button" id="btnCloseLightbox" class="btn btn-outline-gold btn-sm">Đóng ảnh</button>
   </div>
 
+  <!-- ==================== MÀN HÌNH KHÓA MÃ PIN NHÂN VIÊN ==================== -->
+  <div id="pinLockScreen" class="pin-lock-overlay hidden" role="dialog" aria-modal="true" aria-label="Đăng nhập mã PIN nhân viên">
+    <div class="pin-lock-card">
+      <div class="brand-badge" style="width:58px;height:58px;border-radius:16px;">
+        <div class="brand-badge-inner" style="border-radius:14.5px;">
+          <img id="pinLogoImg" class="hidden" alt="Logo phòng tập" />
+          <span id="pinMonogram" class="brand-monogram" style="font-size:16px;">DKT</span>
+        </div>
+      </div>
+
+      <div>
+        <div id="pinGymName" class="brand-title" style="font-size:17px;">DKT PRIVATE GYM</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;font-weight:600;">
+          🔒 Cổng nội bộ — Nhập mã PIN nhân viên
+        </div>
+      </div>
+
+      <div id="pinDotsRow" class="pin-dots-row" aria-label="Số chữ số đã nhập">
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+      </div>
+
+      <div id="pinErrorMsg" style="min-height:18px;font-size:12px;font-weight:700;color:#FB7185;"></div>
+
+      <div id="pinKeypad" class="pin-keypad">
+        <button type="button" class="pin-key" data-pin-key="1">1</button>
+        <button type="button" class="pin-key" data-pin-key="2">2</button>
+        <button type="button" class="pin-key" data-pin-key="3">3</button>
+        <button type="button" class="pin-key" data-pin-key="4">4</button>
+        <button type="button" class="pin-key" data-pin-key="5">5</button>
+        <button type="button" class="pin-key" data-pin-key="6">6</button>
+        <button type="button" class="pin-key" data-pin-key="7">7</button>
+        <button type="button" class="pin-key" data-pin-key="8">8</button>
+        <button type="button" class="pin-key" data-pin-key="9">9</button>
+        <button type="button" class="pin-key key-fn" data-pin-action="clear">Xóa hết</button>
+        <button type="button" class="pin-key" data-pin-key="0">0</button>
+        <button type="button" class="pin-key key-fn" data-pin-action="back">⌫</button>
+      </div>
+
+      <button type="button" id="btnPinSubmit" class="btn btn-gold btn-full" style="max-width:280px;">
+        Mở khóa ứng dụng
+      </button>
+
+      <div style="font-size:11px;color:var(--text-muted);line-height:1.45;">
+        Tự động nhận diện tên HLV/Nhân viên theo mã PIN cá nhân.
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== TOAST THÔNG BÁO ==================== -->
   <div class="toast-wrap">
     <div id="toastEl" class="toast" role="status" aria-live="polite">
@@ -2991,6 +3207,10 @@
       messagingSenderId: "26645774563",
       appId: "1:26645774563:web:de4a7d0b9ba68e0e4445d6",
     };
+
+    // Tùy chọn: Đặt sẵn 1 mã PIN Quản trị (4-6 số, VD: "2580") nếu muốn khóa cứng ngay cả khi chưa nối máy chủ.
+    // Để trống "" nếu bạn muốn bật/tắt và cấp PIN trực tiếp trong mục Cài đặt -> Bảo mật & Sync.
+    const DEFAULT_ADMIN_PIN = "";
 
     const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'dkt-private-gym';
 
@@ -3310,6 +3530,15 @@
     let cloudReady = false;
 
     let staffAlias = DEFAULT_BRAND.coachName;
+    let currentStaffRole = 'admin';
+    let currentStaffPinId = '';
+    let securityConfig = { enabled: false, staffPins: [] };
+    let isAppUnlocked = false;
+    let pinInputBuffer = '';
+    let pinFailCount = 0;
+    let pinLockUntil = 0;
+    let pinCooldownTimer = null;
+
     let brand = { ...DEFAULT_BRAND };
     let studio = { ...DEFAULT_STUDIO, gymHighlights: [...DEFAULT_STUDIO.gymHighlights] };
     let gymPhotos = [];
@@ -3341,6 +3570,228 @@
     /* ==============================================================
        5. HÀM ĐỒNG BỘ MÁY CHỦ THỜI GIAN THỰC (PUBLIC TEAM PATHS)
     ============================================================== */
+    async function hashPinCode(rawPin) {
+      const salted = 'DKT_GYM_PIN_V1:' + String(rawPin || '').trim();
+      try {
+        if (window.crypto && window.crypto.subtle) {
+          const data = new TextEncoder().encode(salted);
+          const buf = await window.crypto.subtle.digest('SHA-256', data);
+          return Array.from(new Uint8Array(buf))
+            .map((b) => b.toString(16).padStart(2, '0'))
+            .join('');
+        }
+      } catch (e) {
+        // Dùng hàm băm dự phòng bên dưới nếu môi trường không hỗ trợ SubtleCrypto
+      }
+      let h1 = 0xdeadbeef;
+      let h2 = 0x41c6ce57;
+      for (let i = 0; i < salted.length; i++) {
+        const ch = salted.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return 'fb_' + (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+    }
+
+    function isPinLockActive() {
+      return Boolean(securityConfig && securityConfig.enabled && Array.isArray(securityConfig.staffPins) && securityConfig.staffPins.length > 0);
+    }
+
+    function renderPinDotsUI() {
+      const row = document.getElementById('pinDotsRow');
+      if (!row) return;
+      const dots = row.querySelectorAll('.pin-dot');
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('filled', idx < pinInputBuffer.length);
+      });
+    }
+
+    function evaluatePinLockUI() {
+      const lockScreen = document.getElementById('pinLockScreen');
+      const headerLockBtn = document.getElementById('btnLockAppNow');
+      const active = isPinLockActive();
+
+      if (!active) {
+        isAppUnlocked = true;
+        currentStaffRole = 'admin';
+        lockScreen.classList.add('hidden');
+        headerLockBtn.classList.add('hidden');
+        return;
+      }
+
+      // Nếu nhân viên đang mở app bị chủ phòng xóa PIN từ xa -> tự động khóa lại ngay
+      if (isAppUnlocked && currentStaffPinId) {
+        const stillExists = securityConfig.staffPins.some((p) => p.id === currentStaffPinId);
+        if (!stillExists) {
+          isAppUnlocked = false;
+          currentStaffPinId = '';
+          pinInputBuffer = '';
+          showToast('Mã PIN của bạn đã bị thu hồi từ quản trị viên!');
+        }
+      }
+
+      if (isAppUnlocked) {
+        lockScreen.classList.add('hidden');
+        headerLockBtn.classList.remove('hidden');
+      } else {
+        lockScreen.classList.remove('hidden');
+        headerLockBtn.classList.add('hidden');
+        renderPinDotsUI();
+      }
+    }
+
+    function lockAppImmediately() {
+      if (!isPinLockActive()) {
+        showToast('Hãy bật khóa mã PIN trong Cài đặt trước');
+        return;
+      }
+      isAppUnlocked = false;
+      currentStaffPinId = '';
+      pinInputBuffer = '';
+      document.getElementById('pinErrorMsg').textContent = '';
+      document.getElementById('settingsModal').classList.add('hidden');
+      evaluatePinLockUI();
+      showToast('Đã khóa màn hình ứng dụng');
+    }
+
+    function triggerPinShake(msg) {
+      const row = document.getElementById('pinDotsRow');
+      const errEl = document.getElementById('pinErrorMsg');
+      errEl.textContent = msg || 'Mã PIN không đúng, vui lòng thử lại';
+      row.classList.remove('shake');
+      void row.offsetWidth;
+      row.classList.add('shake');
+      pinInputBuffer = '';
+      renderPinDotsUI();
+    }
+
+    function startPinCooldownTimer() {
+      if (pinCooldownTimer) clearInterval(pinCooldownTimer);
+      const errEl = document.getElementById('pinErrorMsg');
+      const updateMsg = () => {
+        const leftSec = Math.ceil((pinLockUntil - Date.now()) / 1000);
+        if (leftSec <= 0) {
+          clearInterval(pinCooldownTimer);
+          pinCooldownTimer = null;
+          pinFailCount = 0;
+          errEl.textContent = '';
+        } else {
+          errEl.textContent = `Nhập sai quá nhiều lần. Vui lòng thử lại sau ${leftSec} giây.`;
+        }
+      };
+      updateMsg();
+      pinCooldownTimer = setInterval(updateMsg, 1000);
+    }
+
+    async function verifyEnteredPin(isAutoCheck = false) {
+      if (!isPinLockActive()) return;
+      if (Date.now() < pinLockUntil) {
+        startPinCooldownTimer();
+        pinInputBuffer = '';
+        renderPinDotsUI();
+        return;
+      }
+
+      if (pinInputBuffer.length < 4) {
+        if (!isAutoCheck) triggerPinShake('Mã PIN phải gồm từ 4 đến 6 chữ số');
+        return;
+      }
+
+      const enteredHash = await hashPinCode(pinInputBuffer);
+      const matched = securityConfig.staffPins.find((p) => p.pinHash === enteredHash);
+
+      if (matched) {
+        isAppUnlocked = true;
+        currentStaffPinId = matched.id;
+        currentStaffRole = matched.role === 'staff' ? 'staff' : 'admin';
+        staffAlias = matched.name || brand.coachName || 'Coach';
+        pinInputBuffer = '';
+        pinFailCount = 0;
+        document.getElementById('pinErrorMsg').textContent = '';
+        renderPinDotsUI();
+        evaluatePinLockUI();
+        renderPinSettingsUI();
+        updateSyncStatusUI(cloudReady ? 'online' : 'offline');
+        showToast(`Xin chào ${staffAlias}! Đã mở khóa ứng dụng`);
+        return;
+      }
+
+      // Khi tự kiểm tra ở 4-5 số chưa khớp: nếu còn mã PIN dài hơn thì chờ gõ tiếp
+      const maxLen = Math.max(...securityConfig.staffPins.map((p) => Number(p.pinLength) || 6), 4);
+      if (isAutoCheck && pinInputBuffer.length < maxLen) {
+        return;
+      }
+
+      pinFailCount += 1;
+      if (pinFailCount >= 5) {
+        pinLockUntil = Date.now() + 30000;
+        pinInputBuffer = '';
+        renderPinDotsUI();
+        startPinCooldownTimer();
+      } else {
+        triggerPinShake(`Mã PIN chưa đúng (${pinFailCount}/5)`);
+      }
+    }
+
+    function renderPinSettingsUI() {
+      const toggleBtn = document.getElementById('btnTogglePinLock');
+      const badge = document.getElementById('pinLockStatusBadge');
+      const lockNowBtn = document.getElementById('btnLockFromSettings');
+      const notice = document.getElementById('pinAdminOnlyNotice');
+      const managerWrap = document.getElementById('pinManagerWrap');
+      const listEl = document.getElementById('staffPinList');
+
+      if (!toggleBtn || !listEl) return;
+
+      const active = isPinLockActive();
+      const isAdmin = !active || currentStaffRole === 'admin';
+
+      toggleBtn.classList.toggle('on', active);
+      toggleBtn.setAttribute('aria-checked', String(active));
+      toggleBtn.disabled = !isAdmin;
+      toggleBtn.style.opacity = isAdmin ? '1' : '0.45';
+
+      if (active) {
+        badge.className = 'badge badge-emerald';
+        badge.textContent = `Đang bật (${securityConfig.staffPins.length} mã PIN)`;
+        lockNowBtn.classList.remove('hidden');
+      } else {
+        badge.className = 'badge badge-neutral';
+        badge.textContent = securityConfig.staffPins.length > 0 ? `Đang tắt (${securityConfig.staffPins.length} mã đã lưu)` : 'Đang tắt';
+        lockNowBtn.classList.add('hidden');
+      }
+
+      notice.classList.toggle('hidden', isAdmin);
+      managerWrap.classList.toggle('hidden', !isAdmin);
+
+      if (securityConfig.staffPins.length === 0) {
+        listEl.innerHTML = `<div style="font-size:11.5px;color:var(--text-muted);padding:4px 0;">Chưa có mã PIN nào. Hãy tạo ít nhất 1 mã <strong>Quản trị (Chủ)</strong> bên dưới rồi bật khóa.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = securityConfig.staffPins
+        .map((item) => {
+          const roleBadge = item.role === 'admin'
+            ? '<span class="badge badge-gold" style="font-size:10px;padding:2px 7px;">Quản trị</span>'
+            : '<span class="badge badge-sky" style="font-size:10px;padding:2px 7px;">Nhân viên</span>';
+          return `
+            <div class="staff-pin-row">
+              <div style="min-width:0;">
+                <div style="font-size:12.5px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span>${escapeHTML(item.name)}</span>
+                  ${roleBadge}
+                </div>
+                <div style="font-size:10.5px;color:var(--text-muted);margin-top:2px;">Mã PIN: ${'•'.repeat(item.pinLength || 4)} (đã mã hóa)</div>
+              </div>
+              <button type="button" class="btn btn-danger btn-sm" style="min-height:30px;padding:3px 9px;font-size:11px;" data-del-pin="${escapeHTML(item.id)}">Thu hồi</button>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
     function getPublicDocRef(colName, docId) {
       return doc(db, 'artifacts', APP_ID, 'public', 'data', colName, docId);
     }
@@ -3536,6 +3987,23 @@
           updateSyncStatusUI('online');
         },
         (err) => console.error('Lỗi đồng bộ pt_packages:', err)
+      );
+
+      // 8. Cấu hình Bảo mật Mã PIN nhân viên (security)
+      onSnapshot(
+        getPublicDocRef('gym_config', 'security'),
+        (snap) => {
+          if (snap.exists()) {
+            const d = snap.data();
+            securityConfig = {
+              enabled: Boolean(d.enabled),
+              staffPins: Array.isArray(d.staffPins) ? d.staffPins : [],
+            };
+            renderPinSettingsUI();
+            evaluatePinLockUI();
+          }
+        },
+        (err) => console.error('Lỗi đồng bộ security:', err)
       );
     }
 
@@ -3747,32 +4215,30 @@
 
       const headerLogo = document.getElementById('headerLogoImg');
       const headerMono = document.getElementById('headerMonogram');
+      const pinLogo = document.getElementById('pinLogoImg');
+      const pinMono = document.getElementById('pinMonogram');
+      const pinGymName = document.getElementById('pinGymName');
+      if (pinGymName) pinGymName.textContent = gymName;
+      if (pinMono) pinMono.textContent = monogram;
+
       if (studio.logoDataUrl) {
         headerLogo.src = studio.logoDataUrl;
         headerLogo.classList.remove('hidden');
         headerMono.classList.add('hidden');
+        if (pinLogo && pinMono) {
+          pinLogo.src = studio.logoDataUrl;
+          pinLogo.classList.remove('hidden');
+          pinMono.classList.add('hidden');
+        }
       } else {
         headerLogo.src = '';
         headerLogo.classList.add('hidden');
         headerMono.classList.remove('hidden');
-      }
-
-      try {
-        const manifestObj = {
-          name: `${gymName} — PT Tư Vấn Toàn Diện`,
-          short_name: gymName.slice(0, 14),
-          start_url: '.',
-          display: 'standalone',
-          background_color: '#0A0A0C',
-          theme_color: '#0A0A0C',
-          orientation: 'portrait',
-        };
-        document.getElementById('pwaManifestLink').setAttribute(
-          'href',
-          'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifestObj))
-        );
-      } catch (e) {
-        // Bỏ qua nếu trình duyệt không hỗ trợ cập nhật động manifest
+        if (pinLogo && pinMono) {
+          pinLogo.src = '';
+          pinLogo.classList.add('hidden');
+          pinMono.classList.remove('hidden');
+        }
       }
 
       renderTopGymBanner();
@@ -3784,35 +4250,42 @@
       const bgImg = document.getElementById('appBgImage');
       const bgOverlay = document.getElementById('appBgOverlay');
       const topBanner = document.getElementById('topGymBanner');
+      if (!bgLayer || !bgImg || !bgOverlay) return;
 
-      if (appearance.bgImage) {
-        document.body.classList.add('has-custom-bg');
+      const preset = BG_PRESETS.find((p) => p.id === appearance.presetId) || BG_PRESETS[0];
+      const useCustomPhoto = Boolean(appearance.bgImage);
+
+      if (useCustomPhoto) {
         bgLayer.style.background = '#0A0A0C';
         bgImg.src = appearance.bgImage;
         bgImg.style.filter = `blur(${Number(appearance.bgBlur) || 0}px)`;
         bgImg.classList.remove('hidden');
+
         const alpha = Math.max(0.35, Math.min(0.92, (Number(appearance.bgOverlay) || 72) / 100));
-        bgOverlay.style.background = `rgba(10, 10, 12, ${alpha.toFixed(2)})`;
+        bgOverlay.style.background = `rgba(10, 10, 12, ${alpha})`;
         bgOverlay.classList.remove('hidden');
+
+        document.documentElement.style.setProperty('--bg-outer', '#050507');
+        document.body.classList.add('has-custom-bg');
       } else {
         bgImg.src = '';
         bgImg.classList.add('hidden');
         bgOverlay.classList.add('hidden');
 
-        if (appearance.presetId === 'custom') {
+        if (appearance.presetId === 'custom' && appearance.customColor) {
+          bgLayer.style.background = appearance.customColor;
+          document.documentElement.style.setProperty('--bg-outer', appearance.customColor);
           document.body.classList.add('has-custom-bg');
-          const c = appearance.customColor || '#0A0A0C';
-          bgLayer.style.background = c;
-          document.documentElement.style.setProperty('--bg-outer', '#050507');
         } else {
-          const preset = BG_PRESETS.find((p) => p.id === appearance.presetId) || BG_PRESETS[0];
-          document.body.classList.toggle('has-custom-bg', preset.id !== 'obsidian');
           bgLayer.style.background = preset.bgCss;
-          document.documentElement.style.setProperty('--bg-outer', preset.outer);
+          document.documentElement.style.setProperty('--bg-outer', preset.outer || '#050507');
+          document.body.classList.toggle('has-custom-bg', preset.id !== 'obsidian');
         }
       }
 
-      topBanner.classList.toggle('hidden', !appearance.showTopBanner);
+      if (topBanner) {
+        topBanner.classList.toggle('hidden', !appearance.showTopBanner);
+      }
       renderBgPresetSwatches();
     }
 
@@ -5164,6 +5637,7 @@
       document.getElementById('fileBgPhoto').value = '';
 
       syncSettingsPreviewsUI();
+      renderPinSettingsUI();
       switchSettingsSubTab(initialPanel);
       document.getElementById('settingsModal').classList.remove('hidden');
     }
@@ -5233,30 +5707,190 @@
       document.getElementById('btnOpenAppearance').addEventListener('click', () => openSettingsModal('setPanelBg'));
       document.getElementById('btnEditPtStudio').addEventListener('click', () => openSettingsModal('setPanelBrand'));
       document.getElementById('syncStatusBar').addEventListener('click', () => openSettingsModal('setPanelBackup'));
+      document.getElementById('btnLockAppNow').addEventListener('click', lockAppImmediately);
+      document.getElementById('btnLockFromSettings').addEventListener('click', lockAppImmediately);
 
+      // ===== BÀN PHÍM & QUẢN LÝ MÃ PIN NHÂN VIÊN =====
+      document.getElementById('pinKeypad').addEventListener('click', (e) => {
+        const keyBtn = e.target.closest('[data-pin-key]');
+        if (keyBtn) {
+          if (Date.now() < pinLockUntil) {
+            startPinCooldownTimer();
+            return;
+          }
+          if (pinInputBuffer.length < 6) {
+            pinInputBuffer += keyBtn.dataset.pinKey;
+            document.getElementById('pinErrorMsg').textContent = '';
+            renderPinDotsUI();
+            if (pinInputBuffer.length >= 4) {
+              verifyEnteredPin(true);
+            }
+          }
+          return;
+        }
+        const fnBtn = e.target.closest('[data-pin-action]');
+        if (fnBtn) {
+          const act = fnBtn.dataset.pinAction;
+          if (act === 'clear') pinInputBuffer = '';
+          if (act === 'back') pinInputBuffer = pinInputBuffer.slice(0, -1);
+          document.getElementById('pinErrorMsg').textContent = '';
+          renderPinDotsUI();
+        }
+      });
+
+      document.getElementById('btnPinSubmit').addEventListener('click', () => verifyEnteredPin(false));
+
+      document.addEventListener('keydown', (e) => {
+        const lockScreen = document.getElementById('pinLockScreen');
+        if (!lockScreen || lockScreen.classList.contains('hidden')) return;
+        if (/^[0-9]$/.test(e.key)) {
+          if (Date.now() < pinLockUntil) {
+            startPinCooldownTimer();
+            return;
+          }
+          if (pinInputBuffer.length < 6) {
+            pinInputBuffer += e.key;
+            document.getElementById('pinErrorMsg').textContent = '';
+            renderPinDotsUI();
+            if (pinInputBuffer.length >= 4) verifyEnteredPin(true);
+          }
+        } else if (e.key === 'Backspace') {
+          pinInputBuffer = pinInputBuffer.slice(0, -1);
+          renderPinDotsUI();
+        } else if (e.key === 'Enter') {
+          verifyEnteredPin(false);
+        }
+      });
+
+      document.getElementById('btnTogglePinLock').addEventListener('click', async () => {
+        if (isPinLockActive() && currentStaffRole !== 'admin') {
+          showToast('Chỉ Quản trị viên mới được thay đổi cài đặt khóa PIN');
+          return;
+        }
+        if (!securityConfig.enabled && securityConfig.staffPins.length === 0) {
+          showToast('Hãy tạo ít nhất 1 mã PIN Quản trị ở bên dưới trước khi bật khóa!');
+          document.getElementById('newStaffName').focus();
+          return;
+        }
+        securityConfig.enabled = !securityConfig.enabled;
+        if (securityConfig.enabled) {
+          isAppUnlocked = true;
+        }
+        renderPinSettingsUI();
+        evaluatePinLockUI();
+        if (await cloudSaveDoc('gym_config', 'security', securityConfig)) {
+          showToast(securityConfig.enabled ? 'Đã bật khóa Mã PIN nội bộ cho toàn hệ thống!' : 'Đã tắt khóa Mã PIN nội bộ');
+        }
+      });
+
+      document.getElementById('addStaffPinForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (isPinLockActive() && currentStaffRole !== 'admin') {
+          showToast('Chỉ Quản trị viên mới có quyền cấp mã PIN');
+          return;
+        }
+        const name = document.getElementById('newStaffName').value.trim();
+        const role = document.getElementById('newStaffRole').value === 'staff' ? 'staff' : 'admin';
+        const rawPin = document.getElementById('newStaffPin').value.replace(/\D/g, '');
+
+        if (!name) {
+          showToast('Vui lòng nhập tên nhân viên / HLV');
+          return;
+        }
+        if (rawPin.length < 4 || rawPin.length > 6) {
+          showToast('Mã PIN phải gồm 4 đến 6 chữ số!');
+          return;
+        }
+        if (securityConfig.staffPins.length === 0 && role !== 'admin') {
+          showToast('Mã PIN đầu tiên bắt buộc chọn vai trò Quản trị (Chủ)!');
+          document.getElementById('newStaffRole').value = 'admin';
+          return;
+        }
+
+        const pinHash = await hashPinCode(rawPin);
+        if (securityConfig.staffPins.some((p) => p.pinHash === pinHash)) {
+          showToast('Mã PIN này đã trùng với nhân viên khác, hãy chọn mã khác!');
+          return;
+        }
+
+        const newEntry = {
+          id: 'pin_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          name,
+          role,
+          pinHash,
+          pinLength: rawPin.length,
+          createdAt: new Date().toISOString(),
+        };
+
+        const wasEmpty = securityConfig.staffPins.length === 0;
+        securityConfig.staffPins.push(newEntry);
+        if (wasEmpty) {
+          securityConfig.enabled = true;
+          isAppUnlocked = true;
+          currentStaffPinId = newEntry.id;
+          currentStaffRole = 'admin';
+          staffAlias = newEntry.name;
+        }
+
+        document.getElementById('newStaffName').value = '';
+        document.getElementById('newStaffPin').value = '';
+        renderPinSettingsUI();
+        evaluatePinLockUI();
+        updateSyncStatusUI(cloudReady ? 'online' : 'offline');
+
+        if (await cloudSaveDoc('gym_config', 'security', securityConfig)) {
+          showToast(wasEmpty ? `Đã tạo PIN Quản trị cho "${name}" & tự bật khóa!` : `Đã cấp mã PIN riêng cho "${name}"!`);
+        }
+      });
+
+      document.getElementById('staffPinList').addEventListener('click', (e) => {
+        const delBtn = e.target.closest('[data-del-pin]');
+        if (!delBtn) return;
+        const id = delBtn.dataset.delPin;
+        const target = securityConfig.staffPins.find((p) => p.id === id);
+        if (!target) return;
+
+        const adminCount = securityConfig.staffPins.filter((p) => p.role === 'admin').length;
+        if (securityConfig.enabled && target.role === 'admin' && adminCount <= 1) {
+          showToast('Không thể thu hồi mã Quản trị duy nhất khi khóa PIN đang bật!');
+          return;
+        }
+
+        openConfirm(
+          'Thu hồi mã PIN nhân viên?',
+          `Nhân viên "${target.name}" sẽ không thể dùng mã PIN này để vào app nữa. Tiếp tục?`,
+          'Thu hồi ngay',
+          async () => {
+            securityConfig.staffPins = securityConfig.staffPins.filter((p) => p.id !== id);
+            if (securityConfig.staffPins.length === 0) {
+              securityConfig.enabled = false;
+            }
+            renderPinSettingsUI();
+            evaluatePinLockUI();
+            if (await cloudSaveDoc('gym_config', 'security', securityConfig)) {
+              showToast(`Đã thu hồi mã PIN của "${target.name}"`);
+            }
+          }
+        );
+      });
+
+      // Chuyển sub-tab trong Modal Cài đặt
       document.querySelectorAll('[data-set-tab]').forEach((btn) => {
         btn.addEventListener('click', () => switchSettingsSubTab(btn.dataset.setTab));
       });
 
-      document.getElementById('btnSaveStaffAlias').addEventListener('click', () => {
-        const val = document.getElementById('setStaffAlias').value.trim();
-        staffAlias = val || brand.coachName || 'Coach';
-        updateSyncStatusUI(cloudReady ? 'online' : 'offline');
-        showToast(`Đã đổi tên nhân viên trên máy này thành "${staffAlias}"`);
-      });
-
+      // Upload Logo phòng & Ảnh PT trong Cài đặt
       document.getElementById('fileLogoPhoto').addEventListener('change', async (e) => {
-        const f = e.target.files && e.target.files[0];
-        if (!f) return;
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
         try {
-          tempLogoUrl = await compressImageFile(f, 220, 0.85, true);
+          tempLogoUrl = await compressImageFile(file, 260, 0.85, true);
           syncSettingsPreviewsUI();
-          showToast('Đã tải Logo! Bấm Lưu để đồng bộ');
+          showToast('Đã chọn Logo phòng tập — bấm Lưu để áp dụng');
         } catch (err) {
-          showToast('Không xử lý được ảnh logo này');
+          showToast('Không xử lý được ảnh Logo!');
         }
       });
-
       document.getElementById('btnClearLogoPhoto').addEventListener('click', () => {
         tempLogoUrl = '';
         document.getElementById('fileLogoPhoto').value = '';
@@ -5264,23 +5898,23 @@
       });
 
       document.getElementById('filePtPhoto').addEventListener('change', async (e) => {
-        const f = e.target.files && e.target.files[0];
-        if (!f) return;
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
         try {
-          tempPtPhotoUrl = await compressImageFile(f, 480, 0.78, false);
+          tempPtPhotoUrl = await compressImageFile(file, 420, 0.78, false);
           syncSettingsPreviewsUI();
-          showToast('Đã tải Ảnh PT! Bấm Lưu để đồng bộ');
+          showToast('Đã chọn ảnh PT — bấm Lưu để áp dụng');
         } catch (err) {
-          showToast('Không xử lý được ảnh PT này');
+          showToast('Không xử lý được ảnh PT!');
         }
       });
-
       document.getElementById('btnClearPtPhoto').addEventListener('click', () => {
         tempPtPhotoUrl = '';
         document.getElementById('filePtPhoto').value = '';
         syncSettingsPreviewsUI();
       });
 
+      // Lưu Thương hiệu & Hồ sơ PT
       document.getElementById('brandForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         brand = {
@@ -5288,12 +5922,7 @@
           subtitle: document.getElementById('setSubtitle').value.trim() || DEFAULT_BRAND.subtitle,
           coachName: document.getElementById('setCoachName').value.trim() || DEFAULT_BRAND.coachName,
         };
-
-        const rawHl = document.getElementById('setGymHighlights').value
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean);
-
+        const rawHighlights = document.getElementById('setGymHighlights').value || '';
         studio = {
           ...studio,
           logoDataUrl: tempLogoUrl,
@@ -5302,19 +5931,25 @@
           ptExperience: document.getElementById('setPtExperience').value.trim(),
           ptBio: document.getElementById('setPtBio').value.trim() || DEFAULT_STUDIO.ptBio,
           gymDescription: document.getElementById('setGymDesc').value.trim() || DEFAULT_STUDIO.gymDescription,
-          gymHighlights: rawHl.length > 0 ? rawHl : [...DEFAULT_STUDIO.gymHighlights],
+          gymHighlights: rawHighlights
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
         };
-
-        applyBrandUI();
-        const ok1 = await cloudSaveDoc('gym_config', 'brand', brand);
-        const ok2 = await cloudSaveDoc('gym_config', 'studio', studio);
-        if (ok1 && ok2) {
-          document.getElementById('settingsModal').classList.add('hidden');
-          showToast(cloudReady ? 'Đã lưu & đồng bộ Thương hiệu lên toàn hệ thống!' : 'Đã lưu Thương hiệu!');
+        if (!currentStaffPinId) {
+          staffAlias = brand.coachName;
         }
+        applyBrandUI();
+        updateSyncStatusUI(cloudReady ? 'online' : 'offline');
+        await Promise.all([
+          cloudSaveDoc('gym_config', 'brand', brand),
+          cloudSaveDoc('gym_config', 'studio', studio),
+        ]);
+        document.getElementById('settingsModal').classList.add('hidden');
+        showToast('Đã lưu & đồng bộ Thương hiệu và Hồ sơ PT!');
       });
 
-      // ===== TÙY CHỈNH NỀN APP & BANNER =====
+      // Cài đặt Nền App & Banner
       document.getElementById('btnToggleTopBanner').addEventListener('click', async () => {
         appearance.showTopBanner = !appearance.showTopBanner;
         applyAppearanceUI();
@@ -5328,14 +5963,14 @@
       });
 
       document.getElementById('bgPresetGrid').addEventListener('click', async (e) => {
-        const btn = e.target.closest('[data-bg-preset]');
-        if (!btn) return;
-        appearance.presetId = btn.dataset.bgPreset;
+        const swatch = e.target.closest('[data-bg-preset]');
+        if (!swatch) return;
+        appearance.presetId = swatch.dataset.bgPreset;
         appearance.bgImage = '';
         applyAppearanceUI();
         syncSettingsPreviewsUI();
         await cloudSaveDoc('gym_config', 'appearance', appearance);
-        showToast('Đã đồng bộ màu nền ứng dụng!');
+        showToast('Đã đổi màu nền ứng dụng');
       });
 
       document.getElementById('inputCustomBgColor').addEventListener('input', (e) => {
@@ -5350,18 +5985,16 @@
       });
 
       document.getElementById('fileBgPhoto').addEventListener('change', async (e) => {
-        const f = e.target.files && e.target.files[0];
-        if (!f) return;
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
         try {
-          const compressed = await compressImageFile(f, 720, 0.72, false);
-          appearance.bgImage = compressed;
+          appearance.bgImage = await compressImageFile(file, 720, 0.72, false);
           applyAppearanceUI();
           syncSettingsPreviewsUI();
-          if (await cloudSaveDoc('gym_config', 'appearance', appearance)) {
-            showToast('Đã đồng bộ ảnh nền ứng dụng!');
-          }
+          await cloudSaveDoc('gym_config', 'appearance', appearance);
+          showToast('Đã áp dụng ảnh nền cho ứng dụng!');
         } catch (err) {
-          showToast('Không xử lý được ảnh nền này');
+          showToast('Không đọc được ảnh nền!');
         }
       });
 
@@ -5371,144 +6004,222 @@
         applyAppearanceUI();
         syncSettingsPreviewsUI();
         await cloudSaveDoc('gym_config', 'appearance', appearance);
-        showToast('Đã gỡ ảnh nền ứng dụng');
+        showToast('Đã gỡ ảnh nền');
       });
 
       document.getElementById('sliderBgOverlay').addEventListener('input', (e) => {
-        appearance.bgOverlay = parseInt(e.target.value, 10);
-        document.getElementById('bgOverlayValText').textContent = `${appearance.bgOverlay}%`;
+        appearance.bgOverlay = Number(e.target.value);
         applyAppearanceUI();
+        syncSettingsPreviewsUI();
       });
       document.getElementById('sliderBgOverlay').addEventListener('change', async () => {
         await cloudSaveDoc('gym_config', 'appearance', appearance);
       });
 
       document.getElementById('sliderBgBlur').addEventListener('input', (e) => {
-        appearance.bgBlur = parseInt(e.target.value, 10);
-        document.getElementById('bgBlurValText').textContent = `${appearance.bgBlur}px`;
+        appearance.bgBlur = Number(e.target.value);
         applyAppearanceUI();
+        syncSettingsPreviewsUI();
       });
       document.getElementById('sliderBgBlur').addEventListener('change', async () => {
         await cloudSaveDoc('gym_config', 'appearance', appearance);
       });
 
-      // ===== BANNER PHÍA TRÊN APP & THƯ VIỆN ẢNH PHÒNG TẬP =====
+      // Tên nhân viên & Sao lưu / Nhập JSON
+      document.getElementById('btnSaveStaffAlias').addEventListener('click', () => {
+        const val = document.getElementById('setStaffAlias').value.trim();
+        staffAlias = val || brand.coachName || 'Coach';
+        updateSyncStatusUI(cloudReady ? 'online' : 'offline');
+        showToast(`Đã gắn tên nhân viên: ${staffAlias}`);
+      });
+
+      document.getElementById('btnExportJson').addEventListener('click', () => {
+        try {
+          const payload = {
+            exportedAt: new Date().toISOString(),
+            brand,
+            studio,
+            appearance,
+            gymPhotos,
+            historyRecords,
+            showcaseClients,
+            ptPackages,
+          };
+          const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `dkt-pt-backup-${new Date().toISOString().slice(0, 10)}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showToast('Đã tải xuống file sao lưu .json!');
+        } catch (err) {
+          showToast('Lỗi khi xuất file sao lưu!');
+        }
+      });
+
+      document.getElementById('btnTriggerImportJson').addEventListener('click', () => {
+        document.getElementById('inputImportJson').click();
+      });
+
+      document.getElementById('inputImportJson').addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            const tasks = [];
+            if (data.brand) {
+              brand = { ...DEFAULT_BRAND, ...data.brand };
+              tasks.push(cloudSaveDoc('gym_config', 'brand', brand));
+            }
+            if (data.studio) {
+              studio = { ...DEFAULT_STUDIO, ...data.studio };
+              tasks.push(cloudSaveDoc('gym_config', 'studio', studio));
+            }
+            if (data.appearance) {
+              appearance = { ...DEFAULT_APPEARANCE, ...data.appearance };
+              tasks.push(cloudSaveDoc('gym_config', 'appearance', appearance));
+            }
+            if (Array.isArray(data.gymPhotos)) {
+              gymPhotos = data.gymPhotos;
+              data.gymPhotos.forEach((ph) => {
+                if (ph && ph.id) tasks.push(cloudSaveDoc('gym_photos', ph.id, ph));
+              });
+            }
+            if (Array.isArray(data.historyRecords)) {
+              historyRecords = data.historyRecords;
+              data.historyRecords.forEach((r) => {
+                if (r && r.id) tasks.push(cloudSaveDoc('history_records', r.id, r));
+              });
+            }
+            if (Array.isArray(data.showcaseClients)) {
+              showcaseClients = data.showcaseClients;
+              data.showcaseClients.forEach((c) => {
+                if (c && c.id) tasks.push(cloudSaveDoc('showcase_clients', c.id, c));
+              });
+            }
+            if (Array.isArray(data.ptPackages)) {
+              ptPackages = data.ptPackages;
+              data.ptPackages.forEach((p) => {
+                if (p && p.id) tasks.push(cloudSaveDoc('pt_packages', p.id, p));
+              });
+            }
+            await Promise.all(tasks);
+            applyBrandUI();
+            applyAppearanceUI();
+            renderShowcaseClients();
+            renderPackages();
+            renderHistory();
+            syncSettingsPreviewsUI();
+            showToast('Đã nhập & đồng bộ dữ liệu sao lưu thành công!');
+          } catch (err) {
+            console.error('Lỗi nhập JSON:', err);
+            showToast('File sao lưu không đúng định dạng .json!');
+          } finally {
+            e.target.value = '';
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      // ===== BANNER PHÒNG TẬP & THƯ VIỆN ẢNH PHÒNG =====
       document.getElementById('btnBannerGoStudio').addEventListener('click', () => {
         switchTab('tabShowcase');
         switchShowcaseSubTab('studio');
       });
-
       document.getElementById('btnBannerQuickEdit').addEventListener('click', openGymPhotoModal);
-
       document.getElementById('btnBannerPrev').addEventListener('click', () => {
         bannerSlideIdx -= 1;
         renderTopGymBanner();
       });
-
       document.getElementById('btnBannerNext').addEventListener('click', () => {
         bannerSlideIdx += 1;
         renderTopGymBanner();
       });
-
       document.getElementById('bannerDots').addEventListener('click', (e) => {
         const dot = e.target.closest('[data-banner-dot]');
         if (!dot) return;
-        bannerSlideIdx = parseInt(dot.dataset.bannerDot, 10) || 0;
+        bannerSlideIdx = Number(dot.dataset.bannerDot) || 0;
         renderTopGymBanner();
       });
-
-      let bannerTouchX = 0;
-      const topBannerEl = document.getElementById('topGymBanner');
-      topBannerEl.addEventListener('touchstart', (e) => {
-        if (e.touches && e.touches[0]) bannerTouchX = e.touches[0].clientX;
-      }, { passive: true });
-      topBannerEl.addEventListener('touchend', (e) => {
-        if (!e.changedTouches || !e.changedTouches[0]) return;
-        const dx = e.changedTouches[0].clientX - bannerTouchX;
-        if (Math.abs(dx) > 40 && gymPhotos.length > 1) {
-          bannerSlideIdx += dx < 0 ? 1 : -1;
-          renderTopGymBanner();
+      document.getElementById('bannerPtAvatar').addEventListener('click', () => {
+        if (studio.ptPhotoDataUrl) {
+          openLightbox(studio.ptPhotoDataUrl, `${brand.coachName || 'Coach'} — ${studio.ptTitle || ''}`);
         }
-      }, { passive: true });
-
+      });
       document.getElementById('studioPtAvatarWrap').addEventListener('click', () => {
         if (studio.ptPhotoDataUrl) {
-          openLightbox(studio.ptPhotoDataUrl, `${brand.coachName || 'Coach'} — ${studio.ptTitle || 'PT 1-1'}`);
+          openLightbox(studio.ptPhotoDataUrl, `${brand.coachName || 'Coach'} — ${studio.ptTitle || ''}`);
         }
       });
 
       document.getElementById('btnAddGymPhoto').addEventListener('click', openGymPhotoModal);
-
       document.getElementById('fileGymPhotoInput').addEventListener('change', async (e) => {
-        const f = e.target.files && e.target.files[0];
-        if (!f) return;
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
         try {
-          tempGymUploadUrl = await compressImageFile(f, 720, 0.72, false);
-          const img = document.getElementById('previewGymUploadImg');
-          img.src = tempGymUploadUrl;
-          img.classList.remove('hidden');
-          showToast('Đã nén gọn ảnh phòng tập!');
+          tempGymUploadUrl = await compressImageFile(file, 820, 0.76, false);
+          const preview = document.getElementById('previewGymUploadImg');
+          preview.src = tempGymUploadUrl;
+          preview.classList.remove('hidden');
         } catch (err) {
-          showToast('Không thể đọc ảnh này, vui lòng thử ảnh khác');
+          showToast('Không thể đọc ảnh phòng tập!');
         }
       });
 
       document.getElementById('gymPhotoForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!tempGymUploadUrl) {
-          showToast('Vui lòng chọn một hình ảnh phòng tập trước!');
+          showToast('Vui lòng chọn một ảnh phòng tập trước!');
           return;
         }
-        const isCover = document.getElementById('chkGymPhotoCover').checked || gymPhotos.length === 0;
-        if (isCover) {
-          const resetPromises = gymPhotos
-            .filter((p) => p.isCover)
-            .map((p) => {
-              p.isCover = false;
-              return cloudSaveDoc('gym_photos', p.id, p);
-            });
-          await Promise.all(resetPromises);
-        }
-
-        const newPhoto = {
-          id: 'gym_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-          createdAt: new Date().toISOString(),
+        const isCover = document.getElementById('chkGymPhotoCover').checked;
+        const photoObj = {
+          id: 'gph_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
           dataUrl: tempGymUploadUrl,
           caption: document.getElementById('gymPhotoCaption').value.trim(),
           isCover,
+          createdAt: new Date().toISOString(),
         };
-
+        if (isCover) {
+          for (const existing of gymPhotos) {
+            if (existing.isCover) {
+              existing.isCover = false;
+              await cloudSaveDoc('gym_photos', existing.id, existing);
+            }
+          }
+        }
         if (!cloudReady) {
-          gymPhotos.unshift(newPhoto);
+          gymPhotos.unshift(photoObj);
           renderTopGymBanner();
           renderStudioSection();
         }
-
-        if (await cloudSaveDoc('gym_photos', newPhoto.id, newPhoto)) {
-          bannerSlideIdx = 0;
-          document.getElementById('gymPhotoModal').classList.add('hidden');
-          showToast(cloudReady ? 'Đã thêm & đồng bộ ảnh phòng tập!' : 'Đã thêm ảnh phòng tập!');
-        }
+        await cloudSaveDoc('gym_photos', photoObj.id, photoObj);
+        bannerSlideIdx = 0;
+        document.getElementById('gymPhotoModal').classList.add('hidden');
+        showToast('Đã thêm ảnh phòng tập!');
       });
 
       document.getElementById('gymGalleryContainer').addEventListener('click', async (e) => {
-        const thumb = e.target.closest('[data-lightbox-src]');
-        if (thumb) {
-          openLightbox(thumb.dataset.lightboxSrc, thumb.dataset.lightboxCap);
+        const lb = e.target.closest('[data-lightbox-src]');
+        if (lb) {
+          openLightbox(lb.dataset.lightboxSrc, lb.dataset.lightboxCap);
           return;
         }
         const coverBtn = e.target.closest('[data-set-cover-photo]');
         if (coverBtn) {
-          const id = coverBtn.dataset.setCoverPhoto;
-          const updates = gymPhotos.map((p) => {
-            const nextCover = p.id === id;
-            if (Boolean(p.isCover) !== nextCover) {
-              p.isCover = nextCover;
-              return cloudSaveDoc('gym_photos', p.id, p);
+          const targetId = coverBtn.dataset.setCoverPhoto;
+          for (const ph of gymPhotos) {
+            const shouldCover = ph.id === targetId;
+            if (Boolean(ph.isCover) !== shouldCover) {
+              ph.isCover = shouldCover;
+              await cloudSaveDoc('gym_photos', ph.id, ph);
             }
-            return Promise.resolve(true);
-          });
-          await Promise.all(updates);
+          }
           bannerSlideIdx = 0;
           renderTopGymBanner();
           renderStudioSection();
@@ -5518,226 +6229,90 @@
         const delBtn = e.target.closest('[data-del-gym-photo]');
         if (delBtn) {
           const id = delBtn.dataset.delGymPhoto;
-          openConfirm('Xóa ảnh phòng tập?', 'Ảnh này sẽ bị xóa trên toàn bộ thiết bị đồng bộ. Tiếp tục?', 'Xóa ảnh', async () => {
+          openConfirm('Xóa ảnh phòng tập?', 'Ảnh này sẽ bị gỡ khỏi thư viện và banner trên tất cả thiết bị.', 'Xóa ảnh', async () => {
             if (!cloudReady) {
               gymPhotos = gymPhotos.filter((p) => p.id !== id);
               renderTopGymBanner();
               renderStudioSection();
             }
-            if (await cloudDeleteDoc('gym_photos', id)) {
-              bannerSlideIdx = 0;
-              showToast('Đã xóa ảnh phòng tập');
-            }
+            await cloudDeleteDoc('gym_photos', id);
+            showToast('Đã xóa ảnh phòng tập');
           });
         }
       });
 
-      // Xuất JSON sao lưu
-      document.getElementById('btnExportJson').addEventListener('click', () => {
-        const payload = {
-          app: 'DKT_PT_CONSULTATION_SUITE',
-          version: 3,
-          exportedAt: new Date().toISOString(),
-          brand,
-          studio,
-          gymPhotos,
-          appearance,
-          historyRecords,
-          showcaseClients,
-          ptPackages,
-        };
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const stamp = new Date().toISOString().slice(0, 10);
-        a.href = url;
-        a.download = `DKT_PT_Backup_${stamp}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        showToast('Đã tải xuống file sao lưu (.json)');
-      });
-
-      // Nhập JSON khôi phục & đẩy thẳng lên máy chủ
-      const importInput = document.getElementById('inputImportJson');
-      document.getElementById('btnTriggerImportJson').addEventListener('click', () => {
-        importInput.value = '';
-        importInput.click();
-      });
-
-      importInput.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-          try {
-            const data = JSON.parse(ev.target.result);
-            if (!data || typeof data !== 'object') throw new Error('File không hợp lệ');
-
-            const tasks = [];
-            if (data.brand && typeof data.brand === 'object') {
-              brand = { ...DEFAULT_BRAND, ...data.brand };
-              tasks.push(cloudSaveDoc('gym_config', 'brand', brand));
-            }
-            if (data.studio && typeof data.studio === 'object') {
-              const legacyPhotos = Array.isArray(data.studio.gymPhotos) ? data.studio.gymPhotos : [];
-              const { gymPhotos: _omit, ...cleanStudio } = data.studio;
-              studio = {
-                ...DEFAULT_STUDIO,
-                ...cleanStudio,
-                gymHighlights: Array.isArray(cleanStudio.gymHighlights) ? cleanStudio.gymHighlights : [...DEFAULT_STUDIO.gymHighlights],
-              };
-              tasks.push(cloudSaveDoc('gym_config', 'studio', studio));
-              if (legacyPhotos.length > 0 && !Array.isArray(data.gymPhotos)) {
-                legacyPhotos.forEach((ph) => tasks.push(cloudSaveDoc('gym_photos', ph.id || ('gym_' + Date.now()), ph)));
-              }
-            }
-            if (Array.isArray(data.gymPhotos)) {
-              gymPhotos = data.gymPhotos;
-              data.gymPhotos.forEach((ph) => tasks.push(cloudSaveDoc('gym_photos', ph.id, ph)));
-            }
-            if (data.appearance && typeof data.appearance === 'object') {
-              appearance = { ...DEFAULT_APPEARANCE, ...data.appearance };
-              tasks.push(cloudSaveDoc('gym_config', 'appearance', appearance));
-            }
-            if (Array.isArray(data.historyRecords)) {
-              historyRecords = data.historyRecords;
-              data.historyRecords.forEach((r) => tasks.push(cloudSaveDoc('history_records', r.id, r)));
-            }
-            if (Array.isArray(data.showcaseClients)) {
-              showcaseClients = data.showcaseClients;
-              data.showcaseClients.forEach((c) => tasks.push(cloudSaveDoc('showcase_clients', c.id, c)));
-            }
-            if (Array.isArray(data.ptPackages)) {
-              ptPackages = data.ptPackages;
-              data.ptPackages.forEach((p) => tasks.push(cloudSaveDoc('pt_packages', p.id, p)));
-            }
-
-            await Promise.all(tasks);
-            applyBrandUI();
-            applyAppearanceUI();
-            renderHistory();
-            renderShowcaseClients();
-            renderPackages();
-            document.getElementById('settingsModal').classList.add('hidden');
-            showToast(cloudReady ? 'Đã nhập & đồng bộ dữ liệu sao lưu lên máy chủ!' : 'Đã khôi phục dữ liệu sao lưu!');
-          } catch (err) {
-            console.error('Lỗi nhập JSON:', err);
-            showToast('File sao lưu không hợp lệ hoặc bị lỗi!');
-          }
-        };
-        reader.readAsText(file);
-      });
-
-      // ===== TÊN HỌC VIÊN & NHẢY NHANH TRONG TAB TƯ VẤN (TDEE + KHẢO SÁT) =====
-      const nameCalc = document.getElementById('clientNameCalc');
-      nameCalc.addEventListener('input', (e) => {
-        calcState.clientName = e.target.value;
-      });
-
-      const btnJumpTdee = document.getElementById('btnJumpTdee');
-      const btnJumpScreening = document.getElementById('btnJumpScreening');
-      btnJumpTdee.addEventListener('click', () => {
-        btnJumpTdee.classList.add('active');
-        btnJumpScreening.classList.remove('active');
+      // ===== TAB 1: TƯ VẤN (TDEE, MACRO & KHẢO SÁT THỂ TRẠNG) =====
+      document.getElementById('btnJumpTdee').addEventListener('click', () => {
+        document.getElementById('btnJumpTdee').classList.add('active');
+        document.getElementById('btnJumpScreening').classList.remove('active');
         document.getElementById('sectionTdeeAnchor').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
-      btnJumpScreening.addEventListener('click', () => {
-        btnJumpScreening.classList.add('active');
-        btnJumpTdee.classList.remove('active');
+      document.getElementById('btnJumpScreening').addEventListener('click', () => {
+        document.getElementById('btnJumpScreening').classList.add('active');
+        document.getElementById('btnJumpTdee').classList.remove('active');
         document.getElementById('sectionScreeningAnchor').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
 
-      // Bấm nút trong banner gợi ý ca tương đồng ở Phần Khảo sát -> nhảy thẳng sang Show Khách đã lọc sẵn
-      document.getElementById('matchedClientsBanner').addEventListener('click', (e) => {
-        if (!e.target.closest('#btnJumpMatchedShowcase')) return;
-        showcaseFilter = 'all';
-        document.querySelectorAll('.filter-pill').forEach((p) => p.classList.toggle('active', p.dataset.filter === 'all'));
-        showcaseIssueFilter = [...screenState.selectedIds];
-        showcaseSearchQuery = '';
-        document.getElementById('showcaseSearchInput').value = '';
-        switchTab('tabShowcase');
-        switchShowcaseSubTab('clients');
-        renderShowcaseClients();
-        showToast(`Đã lọc các học viên tương đồng (${showcaseIssueFilter.length} vấn đề)`);
+      document.getElementById('clientNameCalc').addEventListener('input', (e) => {
+        calcState.clientName = e.target.value;
+        renderShowcaseIssueFilterUI();
       });
 
-      // ===== SỰ KIỆN TAB 1: TDEE =====
-      document.querySelectorAll('.gender-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          calcState.gender = btn.dataset.gender;
+      ['btnGenderMale', 'btnGenderFemale'].forEach((id) => {
+        document.getElementById(id).addEventListener('click', (e) => {
+          calcState.gender = e.currentTarget.dataset.gender;
           updateTdeeUI();
         });
-      });
-
-      [
-        { id: 'inputAge', key: 'age', min: 10, max: 100 },
-        { id: 'inputHeight', key: 'height', min: 100, max: 250 },
-        { id: 'inputWeight', key: 'weight', min: 25, max: 250 },
-      ].forEach(({ id, key, min, max }) => {
-        const inp = document.getElementById(id);
-        inp.addEventListener('input', () => {
-          const v = parseFloat(inp.value);
-          if (Number.isFinite(v)) {
-            calcState[key] = v;
-            updateTdeeUI();
-          }
-        });
-        inp.addEventListener('blur', () => {
-          let v = parseFloat(inp.value);
-          if (!Number.isFinite(v)) v = DEFAULT_CALC_STATE[key];
-          v = Math.max(min, Math.min(max, v));
-          calcState[key] = v;
-          inp.value = v;
-          updateTdeeUI();
-        });
-      });
-
-      document.getElementById('inputBodyFat').addEventListener('input', (e) => {
-        calcState.bodyFat = e.target.value.trim();
-        updateTdeeUI();
       });
 
       document.querySelectorAll('.step-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
-          const targetId = btn.dataset.target;
-          const step = parseFloat(btn.dataset.step);
-          const inp = document.getElementById(targetId);
-          const min = parseFloat(inp.min);
-          const max = parseFloat(inp.max);
-          let cur = parseFloat(inp.value);
-          if (!Number.isFinite(cur)) cur = targetId === 'inputBodyFat' ? 20 : 0;
-          else cur = Number((cur + step).toFixed(1));
-          if (Number.isFinite(min)) cur = Math.max(min, cur);
-          if (Number.isFinite(max)) cur = Math.min(max, cur);
-          inp.value = cur;
-
-          if (targetId === 'inputAge') calcState.age = cur;
-          if (targetId === 'inputHeight') calcState.height = cur;
-          if (targetId === 'inputWeight') calcState.weight = cur;
-          if (targetId === 'inputBodyFat') calcState.bodyFat = String(cur);
-          updateTdeeUI();
+          const input = document.getElementById(btn.dataset.target);
+          if (!input) return;
+          const step = Number(btn.dataset.step) || 1;
+          const min = input.min !== '' ? Number(input.min) : -Infinity;
+          const max = input.max !== '' ? Number(input.max) : Infinity;
+          let cur = input.value === '' ? (btn.dataset.target === 'inputBodyFat' ? 20 : 0) : Number(input.value);
+          if (!Number.isFinite(cur)) cur = 0;
+          let next = Math.round((cur + step) * 10) / 10;
+          next = Math.max(min, Math.min(max, next));
+          input.value = next;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
         });
       });
 
-      document.getElementById('btnToggleBf').addEventListener('click', function () {
-        const wrap = document.getElementById('bfWrap');
-        const isHidden = wrap.classList.toggle('hidden');
-        this.classList.toggle('open', !isHidden);
+      document.getElementById('inputAge').addEventListener('input', (e) => {
+        calcState.age = Number(e.target.value);
+        updateTdeeUI();
+      });
+      document.getElementById('inputHeight').addEventListener('input', (e) => {
+        calcState.height = Number(e.target.value);
+        updateTdeeUI();
+      });
+      document.getElementById('inputWeight').addEventListener('input', (e) => {
+        calcState.weight = Number(e.target.value);
+        updateTdeeUI();
+      });
+      document.getElementById('inputBodyFat').addEventListener('input', (e) => {
+        calcState.bodyFat = e.target.value === '' ? '' : Number(e.target.value);
+        updateTdeeUI();
       });
 
+      document.getElementById('btnToggleBf').addEventListener('click', (e) => {
+        const wrap = document.getElementById('bfWrap');
+        const isOpen = wrap.classList.toggle('hidden');
+        e.currentTarget.classList.toggle('open', !isOpen);
+      });
       document.getElementById('btnClearBf').addEventListener('click', () => {
         calcState.bodyFat = '';
         document.getElementById('inputBodyFat').value = '';
         updateTdeeUI();
-        showToast('Đã chuyển về công thức Mifflin-St Jeor');
       });
 
       document.getElementById('activityList').addEventListener('click', (e) => {
         const btn = e.target.closest('[data-activity]');
         if (!btn) return;
-        calcState.activity = parseFloat(btn.dataset.activity);
+        calcState.activity = Number(btn.dataset.activity);
         renderActivityOptions();
         updateTdeeUI();
       });
@@ -5750,28 +6325,76 @@
       });
 
       document.getElementById('proteinSlider').addEventListener('input', (e) => {
-        calcState.proteinPerKg = parseFloat(e.target.value);
+        calcState.proteinPerKg = Number(e.target.value);
         updateTdeeUI();
       });
-
       document.getElementById('fatSlider').addEventListener('input', (e) => {
-        calcState.fatPercent = parseInt(e.target.value, 10);
+        calcState.fatPercent = Number(e.target.value);
         updateTdeeUI();
       });
-
-      document.querySelectorAll('.preset-btn').forEach((btn) => {
+      document.querySelectorAll('.preset-btn[data-fat]').forEach((btn) => {
         btn.addEventListener('click', () => {
-          const v = parseInt(btn.dataset.fat, 10);
-          calcState.fatPercent = v;
-          document.getElementById('fatSlider').value = v;
+          calcState.fatPercent = Number(btn.dataset.fat);
+          document.getElementById('fatSlider').value = calcState.fatPercent;
           updateTdeeUI();
         });
       });
 
+      // Khảo sát thể trạng
+      ['screeningUpperList', 'screeningLowerList', 'screeningInternalList'].forEach((listId) => {
+        document.getElementById(listId).addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-screen-id]');
+          if (!btn) return;
+          const id = btn.dataset.screenId;
+          const idx = screenState.selectedIds.indexOf(id);
+          if (idx >= 0) {
+            screenState.selectedIds.splice(idx, 1);
+          } else {
+            screenState.selectedIds.push(id);
+          }
+          updateScreeningUI();
+        });
+      });
+
+      document.getElementById('noteUpper').addEventListener('input', (e) => {
+        screenState.noteUpper = e.target.value;
+      });
+      document.getElementById('noteLower').addEventListener('input', (e) => {
+        screenState.noteLower = e.target.value;
+      });
+      document.getElementById('noteInternal').addEventListener('input', (e) => {
+        screenState.noteInternal = e.target.value;
+      });
+
+      document.getElementById('btnClearScreening').addEventListener('click', () => {
+        screenState = { ...DEFAULT_SCREEN_STATE, selectedIds: [] };
+        updateScreeningUI();
+        showToast('Đã bỏ chọn toàn bộ mục khảo sát');
+      });
+
+      document.getElementById('matchedClientsBanner').addEventListener('click', (e) => {
+        if (!e.target.closest('#btnJumpMatchedShowcase')) return;
+        showcaseIssueFilter = [...screenState.selectedIds];
+        showcaseFilter = 'all';
+        document.querySelectorAll('.filter-pill').forEach((p) => {
+          p.classList.toggle('active', p.dataset.filter === 'all');
+        });
+        switchTab('tabShowcase');
+        switchShowcaseSubTab('clients');
+        renderShowcaseClients();
+        showToast('Đã lọc các học viên có vấn đề tương đồng!');
+      });
+
+      document.getElementById('btnCopyScreening').addEventListener('click', () => {
+        const ok = copyText(buildScreeningOnlyReport());
+        showToast(ok ? 'Đã sao chép riêng Phiếu khảo sát!' : 'Không thể sao chép tự động');
+      });
+
       document.getElementById('btnCopyZalo').addEventListener('click', () => {
+        if (!lastCalcResult) updateTdeeUI();
         const text = buildCombinedZaloReport(lastCalcResult, screenState, calcState.clientName);
         const ok = copyText(text);
-        showToast(ok ? 'Đã sao chép báo cáo! Dán thẳng vào Zalo' : 'Không thể sao chép tự động');
+        showToast(ok ? 'Đã sao chép báo cáo TDEE + Khảo sát gửi Zalo!' : 'Không thể sao chép tự động');
       });
 
       document.getElementById('btnSaveProfile1').addEventListener('click', saveCurrentConsultation);
@@ -5783,48 +6406,18 @@
         document.getElementById('btnToggleBf').classList.remove('open');
         syncCalcInputsFromState();
         updateScreeningUI();
-        showToast('Đã làm mới toàn bộ thông số tư vấn');
+        showToast('Đã làm mới toàn bộ biểu mẫu tư vấn');
       });
 
-      // ===== SỰ KIỆN TAB 2: KHẢO SÁT =====
-      ['screeningUpperList', 'screeningLowerList', 'screeningInternalList'].forEach((listId) => {
-        document.getElementById(listId).addEventListener('click', (e) => {
-          const btn = e.target.closest('[data-screen-id]');
-          if (!btn) return;
-          const id = btn.dataset.screenId;
-          const idx = screenState.selectedIds.indexOf(id);
-          if (idx >= 0) screenState.selectedIds.splice(idx, 1);
-          else screenState.selectedIds.push(id);
-          updateScreeningUI();
-        });
-      });
-
-      document.getElementById('noteUpper').addEventListener('input', (e) => { screenState.noteUpper = e.target.value; });
-      document.getElementById('noteLower').addEventListener('input', (e) => { screenState.noteLower = e.target.value; });
-      document.getElementById('noteInternal').addEventListener('input', (e) => { screenState.noteInternal = e.target.value; });
-
-      document.getElementById('btnClearScreening').addEventListener('click', () => {
-        screenState = { ...DEFAULT_SCREEN_STATE, selectedIds: [] };
-        updateScreeningUI();
-        showToast('Đã bỏ chọn toàn bộ mục khảo sát');
-      });
-
-      document.getElementById('btnCopyScreening').addEventListener('click', () => {
-        const text = buildScreeningOnlyReport();
-        const ok = copyText(text);
-        showToast(ok ? 'Đã sao chép phiếu khảo sát thể trạng!' : 'Không thể sao chép tự động');
-      });
-
-      // ===== SỰ KIỆN TAB 2: SHOW KHÁCH =====
-      document.getElementById('btnTogglePresentation').addEventListener('click', function () {
+      // ===== TAB 2: SHOW KHÁCH (CHẾ ĐỘ TRÌNH CHIẾU, HỌC VIÊN & GÓI TẬP) =====
+      document.getElementById('btnTogglePresentation').addEventListener('click', (e) => {
         presentationMode = !presentationMode;
         document.body.classList.toggle('presentation-mode', presentationMode);
-        this.classList.toggle('on', presentationMode);
-        this.setAttribute('aria-checked', String(presentationMode));
+        e.currentTarget.classList.toggle('on', presentationMode);
+        e.currentTarget.setAttribute('aria-checked', String(presentationMode));
         document.getElementById('presentDesc').textContent = presentationMode
-          ? 'Đang bật chế độ trình chiếu — Toàn bộ nút quản trị đã ẩn'
+          ? 'Đang ẩn toàn bộ nút Sửa/Xóa — sẵn sàng đưa điện thoại cho khách xem'
           : 'Bật để ẩn nút Sửa/Xóa khi đưa máy cho khách xem';
-        showToast(presentationMode ? 'Đã bật Chế độ Show Khách' : 'Đã tắt Chế độ Show Khách');
       });
 
       document.getElementById('subTabStudioBtn').addEventListener('click', () => switchShowcaseSubTab('studio'));
@@ -5839,7 +6432,6 @@
         });
       });
 
-      // Bộ tìm kiếm & lọc học viên theo vấn đề thể trạng
       document.getElementById('showcaseSearchInput').addEventListener('input', (e) => {
         showcaseSearchQuery = e.target.value;
         renderShowcaseClients();
@@ -5847,6 +6439,14 @@
 
       document.getElementById('btnFilterResolvedOnly').addEventListener('click', () => {
         showcaseResolvedOnly = !showcaseResolvedOnly;
+        renderShowcaseClients();
+      });
+
+      document.getElementById('btnClearShowcaseFilters').addEventListener('click', () => {
+        showcaseIssueFilter = [];
+        showcaseResolvedOnly = false;
+        showcaseSearchQuery = '';
+        document.getElementById('showcaseSearchInput').value = '';
         renderShowcaseClients();
       });
 
@@ -5860,72 +6460,59 @@
         renderShowcaseClients();
       });
 
-      document.getElementById('btnClearShowcaseFilters').addEventListener('click', () => {
-        showcaseIssueFilter = [];
-        showcaseResolvedOnly = false;
-        showcaseSearchQuery = '';
-        document.getElementById('showcaseSearchInput').value = '';
-        renderShowcaseClients();
-      });
-
       document.getElementById('showcaseConsultMatchBanner').addEventListener('click', (e) => {
         if (!e.target.closest('#btnApplyConsultMatch')) return;
         showcaseIssueFilter = [...screenState.selectedIds];
-        showcaseResolvedOnly = false;
         renderShowcaseClients();
-        showToast('Đã lọc học viên trùng vấn đề với khách đang tư vấn!');
+        showToast('Đã lọc khớp với khách đang tư vấn');
       });
 
       document.getElementById('btnAddShowcaseClient').addEventListener('click', () => openClientModal(null));
 
-      // Nạp nhanh thông tin & vấn đề thể trạng từ Tab Tư vấn / Lịch sử vào Modal Học viên
       document.getElementById('btnApplyImportHistory').addEventListener('click', () => {
         const val = document.getElementById('scImportHistorySelect').value;
         if (!val) {
-          showToast('Hãy chọn một hồ sơ tư vấn trước');
+          showToast('Hãy chọn một hồ sơ trong danh sách trước');
           return;
         }
-        let importedName = '';
-        let importedIssues = [];
-        let notesList = [];
-
         if (val === '__current__') {
-          importedName = (calcState.clientName || '').trim();
-          importedIssues = [...(screenState.selectedIds || [])];
-          if (screenState.noteUpper.trim()) notesList.push(screenState.noteUpper.trim());
-          if (screenState.noteLower.trim()) notesList.push(screenState.noteLower.trim());
-          if (screenState.noteInternal.trim()) notesList.push(screenState.noteInternal.trim());
-        } else {
-          const rec = historyRecords.find((r) => r.id === val);
-          if (!rec) return;
-          const sc = rec.screenStateSnapshot || { selectedIds: [] };
-          importedName = rec.rawClientName || rec.clientName || '';
-          importedIssues = Array.isArray(sc.selectedIds) ? [...sc.selectedIds] : [];
-          if (sc.noteUpper) notesList.push(sc.noteUpper);
-          if (sc.noteLower) notesList.push(sc.noteLower);
-          if (sc.noteInternal) notesList.push(sc.noteInternal);
-        }
-
-        if (importedName && !document.getElementById('scName').value.trim()) {
-          document.getElementById('scName').value = importedName;
-        }
-        tempIssuesHad = Array.from(new Set([...tempIssuesHad, ...importedIssues]));
-
-        if (!document.getElementById('scBeforeState').value.trim()) {
-          const titles = SCREENING_ITEMS.filter((it) => importedIssues.includes(it.id)).map((it) => it.title);
-          const summaryParts = [];
-          if (titles.length > 0) summaryParts.push(`Gặp vấn đề: ${titles.join(', ')}.`);
-          if (notesList.length > 0) summaryParts.push(notesList.join(' • '));
-          if (summaryParts.length > 0) {
-            document.getElementById('scBeforeState').value = summaryParts.join(' ');
+          if (calcState.clientName.trim()) document.getElementById('scName').value = calcState.clientName.trim();
+          const ids = [...screenState.selectedIds];
+          tempIssuesHad = Array.from(new Set([...tempIssuesHad, ...ids]));
+          const titles = SCREENING_ITEMS.filter((it) => ids.includes(it.id)).map((it) => it.title);
+          const notes = [screenState.noteUpper, screenState.noteLower, screenState.noteInternal].filter(Boolean);
+          if (!document.getElementById('scBeforeState').value.trim()) {
+            document.getElementById('scBeforeState').value = [
+              titles.length ? `Từng gặp: ${titles.join(', ')}.` : '',
+              notes.join(' • '),
+            ]
+              .filter(Boolean)
+              .join(' ');
           }
+          renderClientIssuesPicker();
+          showToast('Đã lấy dữ liệu từ Tab Tư vấn!');
+          return;
         }
-
+        const rec = historyRecords.find((r) => r.id === val);
+        if (!rec) return;
+        document.getElementById('scName').value = rec.rawClientName || rec.clientName || '';
+        const sc = rec.screenStateSnapshot || { selectedIds: [] };
+        const ids = Array.isArray(sc.selectedIds) ? sc.selectedIds : [];
+        tempIssuesHad = Array.from(new Set([...tempIssuesHad, ...ids]));
+        const titles = SCREENING_ITEMS.filter((it) => ids.includes(it.id)).map((it) => it.title);
+        const notes = [sc.noteUpper, sc.noteLower, sc.noteInternal].filter(Boolean);
+        if (!document.getElementById('scBeforeState').value.trim()) {
+          document.getElementById('scBeforeState').value = [
+            titles.length ? `Từng gặp: ${titles.join(', ')}.` : '',
+            notes.join(' • '),
+          ]
+            .filter(Boolean)
+            .join(' ');
+        }
         renderClientIssuesPicker();
-        showToast(`Đã đồng bộ ${importedIssues.length} vấn đề thể trạng từ phiếu khảo sát!`);
+        showToast(`Đã đồng bộ dữ liệu của "${rec.clientName}"`);
       });
 
-      // Chọn Từng gặp / Đánh dấu Đã hết trong Modal Học viên
       document.getElementById('scIssuesPicker').addEventListener('click', (e) => {
         const hadBtn = e.target.closest('[data-pick-had]');
         if (hadBtn) {
@@ -5939,50 +6526,45 @@
           renderClientIssuesPicker();
           return;
         }
-
         const resBtn = e.target.closest('[data-pick-resolved]');
         if (resBtn) {
           const id = resBtn.dataset.pickResolved;
           if (tempIssuesResolved.includes(id)) {
             tempIssuesResolved = tempIssuesResolved.filter((x) => x !== id);
           } else {
-            if (!tempIssuesHad.includes(id)) tempIssuesHad.push(id);
             tempIssuesResolved.push(id);
+            if (!tempIssuesHad.includes(id)) tempIssuesHad.push(id);
           }
           renderClientIssuesPicker();
         }
       });
 
       document.getElementById('fileBeforePhoto').addEventListener('change', async (e) => {
-        const f = e.target.files && e.target.files[0];
-        if (!f) return;
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
         try {
-          tempPhotoBefore = await compressImageFile(f, 480, 0.72);
+          tempPhotoBefore = await compressImageFile(file, 480, 0.72, false);
           updatePhotoPreviewUI();
-          showToast('Đã nén & tải Ảnh Trước');
         } catch (err) {
-          showToast('Không thể xử lý ảnh này, vui lòng chọn ảnh khác');
+          showToast('Không thể đọc ảnh Trước!');
         }
       });
-
-      document.getElementById('fileAfterPhoto').addEventListener('change', async (e) => {
-        const f = e.target.files && e.target.files[0];
-        if (!f) return;
-        try {
-          tempPhotoAfter = await compressImageFile(f, 480, 0.72);
-          updatePhotoPreviewUI();
-          showToast('Đã nén & tải Ảnh Sau');
-        } catch (err) {
-          showToast('Không thể xử lý ảnh này, vui lòng chọn ảnh khác');
-        }
-      });
-
       document.getElementById('btnClearBeforePhoto').addEventListener('click', () => {
         tempPhotoBefore = '';
         document.getElementById('fileBeforePhoto').value = '';
         updatePhotoPreviewUI();
       });
 
+      document.getElementById('fileAfterPhoto').addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        try {
+          tempPhotoAfter = await compressImageFile(file, 480, 0.72, false);
+          updatePhotoPreviewUI();
+        } catch (err) {
+          showToast('Không thể đọc ảnh Sau!');
+        }
+      });
       document.getElementById('btnClearAfterPhoto').addEventListener('click', () => {
         tempPhotoAfter = '';
         document.getElementById('fileAfterPhoto').value = '';
@@ -5991,12 +6573,12 @@
 
       document.getElementById('clientForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const editId = document.getElementById('editClientId').value;
+        const editId = document.getElementById('editClientId').value.trim();
         const existing = editId ? showcaseClients.find((c) => c.id === editId) : null;
-        const payload = {
+        const clientObj = {
           id: editId || 'cli_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-          createdAt: existing && existing.createdAt ? existing.createdAt : new Date().toISOString(),
           isSample: false,
+          createdAt: existing && existing.createdAt ? existing.createdAt : new Date().toISOString(),
           name: document.getElementById('scName').value.trim(),
           status: document.getElementById('scStatus').value,
           duration: document.getElementById('scDuration').value.trim(),
@@ -6004,139 +6586,125 @@
           beforeState: document.getElementById('scBeforeState').value.trim(),
           transformation: document.getElementById('scTransformation').value.trim(),
           quote: document.getElementById('scQuote').value.trim(),
-          issuesHad: [...tempIssuesHad],
-          issuesResolved: [...tempIssuesResolved],
+          issuesHad: Array.from(new Set([...tempIssuesHad, ...tempIssuesResolved])),
+          issuesResolved: Array.from(new Set(tempIssuesResolved)),
           photoBefore: tempPhotoBefore,
           photoAfter: tempPhotoAfter,
         };
 
         if (!cloudReady) {
           if (editId) {
-            const idx = showcaseClients.findIndex((c) => c.id === editId);
-            if (idx >= 0) showcaseClients[idx] = payload;
+            showcaseClients = showcaseClients.map((c) => (c.id === editId ? clientObj : c));
           } else {
-            showcaseClients.unshift(payload);
+            showcaseClients.unshift(clientObj);
           }
           renderShowcaseClients();
         }
-
-        if (await cloudSaveDoc('showcase_clients', payload.id, payload)) {
-          document.getElementById('clientModal').classList.add('hidden');
-          showToast(editId ? 'Đã cập nhật & đồng bộ học viên!' : 'Đã thêm & đồng bộ học viên mới!');
-        }
+        await cloudSaveDoc('showcase_clients', clientObj.id, clientObj);
+        document.getElementById('clientModal').classList.add('hidden');
+        renderPlaybook();
+        showToast(editId ? 'Đã cập nhật hồ sơ học viên!' : 'Đã thêm học viên Showcase!');
       });
 
       document.getElementById('showcaseClientList').addEventListener('click', (e) => {
-        const photoFrame = e.target.closest('[data-lightbox-src]');
-        if (photoFrame) {
-          openLightbox(photoFrame.dataset.lightboxSrc, photoFrame.dataset.lightboxCap);
+        const lb = e.target.closest('[data-lightbox-src]');
+        if (lb) {
+          openLightbox(lb.dataset.lightboxSrc, lb.dataset.lightboxCap);
           return;
         }
-
         const editBtn = e.target.closest('[data-edit-client]');
         if (editBtn) {
-          const found = showcaseClients.find((c) => c.id === editBtn.dataset.editClient);
-          if (found) openClientModal(found);
+          const cli = showcaseClients.find((c) => c.id === editBtn.dataset.editClient);
+          if (cli) openClientModal(cli);
           return;
         }
-
         const delBtn = e.target.closest('[data-del-client]');
         if (delBtn) {
           const id = delBtn.dataset.delClient;
-          const found = showcaseClients.find((c) => c.id === id);
-          openConfirm(
-            'Xóa học viên Showcase?',
-            `Hồ sơ "${found ? found.name : ''}" sẽ bị xóa trên toàn bộ máy đồng bộ. Tiếp tục?`,
-            'Xóa ngay',
-            async () => {
-              if (!cloudReady) {
-                showcaseClients = showcaseClients.filter((c) => c.id !== id);
-                renderShowcaseClients();
-              }
-              if (await cloudDeleteDoc('showcase_clients', id)) {
-                showToast('Đã xóa hồ sơ học viên');
-              }
+          const cli = showcaseClients.find((c) => c.id === id);
+          if (!cli) return;
+          openConfirm('Xóa học viên Showcase?', `Bạn có chắc muốn xóa "${cli.name}" khỏi danh sách Show Khách?`, 'Xóa', async () => {
+            if (!cloudReady) {
+              showcaseClients = showcaseClients.filter((c) => c.id !== id);
+              renderShowcaseClients();
             }
-          );
+            await cloudDeleteDoc('showcase_clients', id);
+            renderPlaybook();
+            showToast('Đã xóa học viên');
+          });
         }
       });
 
+      // Gói tập PT
       document.getElementById('btnAddPackage').addEventListener('click', () => openPackageModal(null));
 
       document.getElementById('packageForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const editId = document.getElementById('editPackageId').value;
+        const editId = document.getElementById('editPackageId').value.trim();
         const existing = editId ? ptPackages.find((p) => p.id === editId) : null;
-        const rawBenefits = document.getElementById('pkgBenefits').value
-          .split('\n')
-          .map((line) => line.trim())
+        const benefits = document
+          .getElementById('pkgBenefits')
+          .value.split('\n')
+          .map((s) => s.trim())
           .filter(Boolean);
 
-        const payload = {
+        const pkgObj = {
           id: editId || 'pkg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-          order: existing && existing.order ? existing.order : ptPackages.length + 1,
           isSample: false,
+          order: existing && existing.order ? existing.order : ptPackages.length + 1,
           name: document.getElementById('pkgName').value.trim(),
           badge: document.getElementById('pkgBadge').value.trim(),
-          price: Math.max(0, parseInt(document.getElementById('pkgPrice').value, 10) || 0),
-          sessions: Math.max(1, parseInt(document.getElementById('pkgSessions').value, 10) || 1),
+          price: Number(document.getElementById('pkgPrice').value) || 0,
+          sessions: Math.max(1, Number(document.getElementById('pkgSessions').value) || 1),
           validity: document.getElementById('pkgValidity').value.trim(),
           fit: document.getElementById('pkgFit').value.trim(),
-          benefits: rawBenefits,
+          benefits,
         };
 
         if (!cloudReady) {
           if (editId) {
-            const idx = ptPackages.findIndex((p) => p.id === editId);
-            if (idx >= 0) ptPackages[idx] = payload;
+            ptPackages = ptPackages.map((p) => (p.id === editId ? pkgObj : p));
           } else {
-            ptPackages.push(payload);
+            ptPackages.push(pkgObj);
           }
           renderPackages();
         }
-
-        if (await cloudSaveDoc('pt_packages', payload.id, payload)) {
-          document.getElementById('packageModal').classList.add('hidden');
-          showToast(editId ? 'Đã cập nhật & đồng bộ gói tập!' : 'Đã thêm & đồng bộ gói tập mới!');
-        }
+        await cloudSaveDoc('pt_packages', pkgObj.id, pkgObj);
+        document.getElementById('packageModal').classList.add('hidden');
+        showToast(editId ? 'Đã cập nhật gói tập!' : 'Đã thêm gói tập PT!');
       });
 
       document.getElementById('packageList').addEventListener('click', (e) => {
         const editBtn = e.target.closest('[data-edit-pkg]');
         if (editBtn) {
-          const found = ptPackages.find((p) => p.id === editBtn.dataset.editPkg);
-          if (found) openPackageModal(found);
+          const pkg = ptPackages.find((p) => p.id === editBtn.dataset.editPkg);
+          if (pkg) openPackageModal(pkg);
           return;
         }
-
         const delBtn = e.target.closest('[data-del-pkg]');
         if (delBtn) {
           const id = delBtn.dataset.delPkg;
-          const found = ptPackages.find((p) => p.id === id);
-          openConfirm(
-            'Xóa gói tập PT?',
-            `Gói "${found ? found.name : ''}" sẽ bị xóa khỏi bảng giá chung trên mọi máy. Tiếp tục?`,
-            'Xóa gói',
-            async () => {
-              if (!cloudReady) {
-                ptPackages = ptPackages.filter((p) => p.id !== id);
-                renderPackages();
-              }
-              if (await cloudDeleteDoc('pt_packages', id)) {
-                showToast('Đã xóa gói tập');
-              }
+          const pkg = ptPackages.find((p) => p.id === id);
+          if (!pkg) return;
+          openConfirm('Xóa gói tập PT?', `Xóa gói "${pkg.name}" khỏi danh sách Show Khách?`, 'Xóa gói', async () => {
+            if (!cloudReady) {
+              ptPackages = ptPackages.filter((p) => p.id !== id);
+              renderPackages();
             }
-          );
+            await cloudDeleteDoc('pt_packages', id);
+            showToast('Đã xóa gói tập');
+          });
         }
       });
 
-      // ===== SỰ KIỆN TAB 4: LỊCH SỬ =====
+      // ===== TAB 3: LỊCH SỬ =====
       document.getElementById('historySearchInput').addEventListener('input', renderHistory);
 
       document.getElementById('btnClearAllHistory').addEventListener('click', () => {
+        if (historyRecords.length === 0) return;
         openConfirm(
           'Xóa toàn bộ lịch sử tư vấn?',
-          'Toàn bộ hồ sơ TDEE & Khảo sát trên máy chủ chung sẽ bị xóa. Học viên Show Khách, Gói tập và Thương hiệu vẫn giữ nguyên.',
+          `Thao tác này sẽ xóa vĩnh viễn ${historyRecords.length} hồ sơ tư vấn trên toàn bộ thiết bị đồng bộ.`,
           'Xóa tất cả',
           async () => {
             const ids = historyRecords.map((r) => r.id);
@@ -6213,8 +6781,23 @@
     /* ==============================================================
        15. KHỞI CHẠY ỨNG DỤNG
     ============================================================== */
-    function init() {
+    async function init() {
       try {
+        if (DEFAULT_ADMIN_PIN && /^\d{4,6}$/.test(DEFAULT_ADMIN_PIN.trim())) {
+          const defaultHash = await hashPinCode(DEFAULT_ADMIN_PIN.trim());
+          securityConfig = {
+            enabled: true,
+            staffPins: [
+              {
+                id: 'pin_default_admin',
+                name: brand.coachName || 'Quản trị',
+                role: 'admin',
+                pinHash: defaultHash,
+                pinLength: DEFAULT_ADMIN_PIN.trim().length,
+              },
+            ],
+          };
+        }
         applyBrandUI();
         applyAppearanceUI();
         bindAllEvents();
@@ -6223,6 +6806,8 @@
         renderShowcaseClients();
         renderPackages();
         renderHistory();
+        renderPinSettingsUI();
+        evaluatePinLockUI();
         initCloudSync();
       } catch (err) {
         console.error('Lỗi khởi chạy ứng dụng:', err);
