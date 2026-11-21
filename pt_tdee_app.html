@@ -1,0 +1,2027 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>DKT Private Gym — Tính Nhanh TDEE &amp; Macro</title>
+
+  <!-- ==================== CẤU HÌNH PWA (CHẠY TOÀN MÀN HÌNH NHƯ APP GỐC) ==================== -->
+  <meta name="application-name" content="DKT Private Gym" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="DKT Gym TDEE" />
+  <meta name="theme-color" content="#0D0D0F" />
+  <meta name="description" content="Ứng dụng tính nhanh TDEE, BMR, Macro và lượng nước uống khuyến nghị dành cho HLV cá nhân." />
+
+  <!-- Icon App SVG nền đen nhám chữ vàng gold nhúng dạng Data URI -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23F3D066'/%3E%3Cstop offset='50%25' stop-color='%23D4AF37'/%3E%3Cstop offset='100%25' stop-color='%23A88420'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='%230D0D0F'/%3E%3Crect x='26' y='26' width='460' height='460' rx='92' fill='none' stroke='url(%23g)' stroke-width='12' stroke-opacity='0.85'/%3E%3Cpath d='M26 150 L150 26 M362 486 L486 362' stroke='%23D4AF37' stroke-width='4' stroke-opacity='0.35'/%3E%3Ctext x='256' y='282' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-weight='900' font-size='150' letter-spacing='6' fill='url(%23g)'%3EDKT%3C/text%3E%3Ctext x='256' y='356' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-weight='700' font-size='44' letter-spacing='10' fill='%23E4E4E7'%3ETDEE PRO%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23F3D066'/%3E%3Cstop offset='50%25' stop-color='%23D4AF37'/%3E%3Cstop offset='100%25' stop-color='%23A88420'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' fill='%230D0D0F'/%3E%3Crect x='28' y='28' width='456' height='456' rx='84' fill='none' stroke='url(%23g)' stroke-width='12'/%3E%3Ctext x='256' y='282' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-weight='900' font-size='150' letter-spacing='6' fill='url(%23g)'%3EDKT%3C/text%3E%3Ctext x='256' y='356' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-weight='700' font-size='44' letter-spacing='10' fill='%23E4E4E7'%3ETDEE PRO%3C/text%3E%3C/svg%3E" />
+  <link rel="manifest" id="pwaManifestLink" href='data:application/manifest+json,{"name":"DKT Private Gym — Tính Nhanh TDEE & Macro","short_name":"DKT Gym","start_url":".","display":"standalone","background_color":"#0D0D0F","theme_color":"#0D0D0F","orientation":"portrait"}' />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Cấu hình Tailwind tùy chỉnh tông màu Đen Nhám & Vàng Gold Ánh Kim -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            obsidian: '#0D0D0F',
+            charcoal: '#16161A',
+            surface: '#1E1E24',
+            gold: {
+              DEFAULT: '#D4AF37',
+              light: '#F3D066',
+              dark: '#A88420',
+            },
+          },
+          boxShadow: {
+            'gold-glow': '0 0 28px -8px rgba(212, 175, 55, 0.38)',
+            'gold-sm': '0 4px 16px -4px rgba(212, 175, 55, 0.28)',
+            'cyan-sm': '0 4px 18px -6px rgba(56, 189, 248, 0.25)',
+          },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="bg-[#070709] text-zinc-100 font-sans antialiased selection:bg-gold/30 selection:text-gold-light min-h-screen flex justify-center overflow-x-hidden">
+
+  <!-- Khung hiển thị chuẩn App di động (max-width 480px căn giữa trên desktop, tràn viền trên điện thoại) -->
+  <div class="w-full max-w-[480px] min-h-screen bg-obsidian flex flex-col relative sm:border-x sm:border-zinc-800/80 sm:shadow-2xl">
+
+    <!-- ==================== HEADER THƯƠNG HIỆU + HỌA TIẾT HÌNH HỌC ==================== -->
+    <header class="sticky top-0 z-30 bg-obsidian/95 backdrop-blur-lg border-b border-gold/25 overflow-hidden">
+      <!-- Họa tiết hình học vàng gold tinh tế (Geometric Accent Lines) -->
+      <svg class="pointer-events-none absolute inset-0 w-full h-full opacity-45" viewBox="0 0 480 88" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="geoGold" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.05" />
+            <stop offset="45%" stop-color="#F3D066" stop-opacity="0.45" />
+            <stop offset="100%" stop-color="#A88420" stop-opacity="0.1" />
+          </linearGradient>
+        </defs>
+        <path d="M0 16 L72 16 L96 0" fill="none" stroke="url(#geoGold)" stroke-width="1" />
+        <path d="M290 0 L330 40 L480 40" fill="none" stroke="url(#geoGold)" stroke-width="1" />
+        <path d="M348 0 L388 40 L348 88" fill="none" stroke="url(#geoGold)" stroke-width="0.9" />
+        <path d="M402 0 L446 44 L402 88" fill="none" stroke="url(#geoGold)" stroke-width="0.8" />
+        <polygon points="366,18 374,26 366,34 358,26" fill="none" stroke="#F3D066" stroke-opacity="0.35" stroke-width="1" />
+        <line x1="0" y1="87" x2="480" y2="87" stroke="url(#geoGold)" stroke-width="1.5" />
+      </svg>
+
+      <div class="relative z-10 px-4 py-3.5 flex items-center justify-between gap-2.5">
+        <div class="flex items-center gap-3 min-w-0">
+          <!-- Biểu tượng Monogram Phòng Gym -->
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-light via-gold to-gold-dark p-[1px] shadow-gold-sm shrink-0">
+            <div class="w-full h-full rounded-[11px] bg-obsidian flex items-center justify-center">
+              <span id="headerBrandMonogram" class="text-xs font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-br from-gold-light to-gold">DKT</span>
+            </div>
+          </div>
+
+          <!-- Tên phòng gym & Dòng phụ -->
+          <div class="min-w-0">
+            <h1 id="headerGymName" class="text-[15px] font-black tracking-wide uppercase text-transparent bg-clip-text bg-gradient-to-r from-gold-light via-amber-100 to-gold truncate leading-tight">
+              DKT PRIVATE GYM
+            </h1>
+            <p id="headerGymSubtitle" class="text-[10.5px] font-semibold tracking-wider text-zinc-400 truncate mt-0.5">
+              TDEE • MACRO • HYDRATION
+            </p>
+            <p id="headerCoachTag" class="hidden text-[10px] font-medium text-gold-light/90 truncate mt-0.5"></p>
+          </div>
+        </div>
+
+        <!-- Nút Bánh Răng Tùy Chỉnh Thương Hiệu -->
+        <button
+          id="btnOpenBrandModal"
+          type="button"
+          title="Tùy chỉnh thương hiệu phòng gym"
+          aria-label="Tùy chỉnh thương hiệu"
+          class="w-10 h-10 rounded-xl bg-charcoal/90 hover:bg-surface active:scale-95 border border-gold/30 text-gold-light flex items-center justify-center shadow-gold-sm transition-all shrink-0"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ==================== NỘI DUNG CHÍNH ==================== -->
+    <main class="flex-1 pb-24 px-4 pt-4">
+
+      <!-- ========== TAB 1: TÍNH TDEE ========== -->
+      <section id="tabCalculator" class="space-y-4">
+
+        <!-- 1. NHẬP THÔNG SỐ HỌC VIÊN -->
+        <div class="bg-charcoal border border-zinc-800/90 rounded-2xl p-4 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-gold-light flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full bg-gradient-to-b from-gold-light to-gold-dark"></span>
+              Thông số học viên
+            </h2>
+            <span id="formulaBadge" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-surface text-zinc-300 border border-zinc-700/80">
+              Mifflin-St Jeor
+            </span>
+          </div>
+
+          <!-- Tên học viên (Tùy chọn) -->
+          <div>
+            <label for="clientName" class="block text-xs font-medium text-zinc-400 mb-1.5">
+              Tên học viên <span class="text-zinc-500 font-normal">(tùy chọn)</span>
+            </label>
+            <input
+              id="clientName"
+              type="text"
+              placeholder="VD: Anh Minh, Chị Linh..."
+              maxlength="50"
+              class="w-full bg-obsidian border border-zinc-800 focus:border-gold focus:ring-1 focus:ring-gold/40 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all"
+            />
+          </div>
+
+          <!-- Giới tính: 2 thẻ lớn Nam / Nữ -->
+          <div>
+            <span class="block text-xs font-medium text-zinc-400 mb-1.5">Giới tính</span>
+            <div class="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                id="btnGenderMale"
+                data-gender="male"
+                class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border font-bold text-sm transition-all active:scale-[0.98] bg-gold/15 border-gold text-gold-light shadow-gold-sm"
+              >
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="10" cy="14" r="5"></circle>
+                  <path d="M19 5l-5.4 5.4"></path>
+                  <path d="M15 5h4v4"></path>
+                </svg>
+                <span>Nam</span>
+              </button>
+
+              <button
+                type="button"
+                id="btnGenderFemale"
+                data-gender="female"
+                class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border font-bold text-sm transition-all active:scale-[0.98] bg-obsidian border-zinc-800 text-zinc-400 hover:border-zinc-700"
+              >
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="9" r="5"></circle>
+                  <path d="M12 14v7"></path>
+                  <path d="M9 18h6"></path>
+                </svg>
+                <span>Nữ</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tuổi, Chiều cao, Cân nặng -->
+          <div class="space-y-2.5">
+            <!-- Tuổi -->
+            <div class="bg-obsidian border border-zinc-800/90 rounded-xl p-2.5 flex items-center justify-between gap-2">
+              <div class="pl-1.5">
+                <label for="inputAge" class="block text-xs font-semibold text-zinc-200">Tuổi</label>
+                <span class="text-[11px] text-zinc-500">Đơn vị: năm</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" data-step-target="inputAge" data-step="-1" class="step-btn w-10 h-10 rounded-xl bg-charcoal hover:bg-surface active:scale-95 border border-zinc-800 text-gold-light font-bold text-lg flex items-center justify-center select-none">−</button>
+                <input
+                  id="inputAge"
+                  type="number"
+                  inputmode="numeric"
+                  min="10"
+                  max="100"
+                  value="28"
+                  class="w-16 h-10 bg-surface border border-zinc-800 focus:border-gold rounded-xl text-center text-base font-bold text-white outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <button type="button" data-step-target="inputAge" data-step="1" class="step-btn w-10 h-10 rounded-xl bg-charcoal hover:bg-surface active:scale-95 border border-zinc-800 text-gold-light font-bold text-lg flex items-center justify-center select-none">+</button>
+              </div>
+            </div>
+
+            <!-- Chiều cao (cm) -->
+            <div class="bg-obsidian border border-zinc-800/90 rounded-xl p-2.5 flex items-center justify-between gap-2">
+              <div class="pl-1.5">
+                <label for="inputHeight" class="block text-xs font-semibold text-zinc-200">Chiều cao</label>
+                <span class="text-[11px] text-zinc-500">Đơn vị: cm</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" data-step-target="inputHeight" data-step="-1" class="step-btn w-10 h-10 rounded-xl bg-charcoal hover:bg-surface active:scale-95 border border-zinc-800 text-gold-light font-bold text-lg flex items-center justify-center select-none">−</button>
+                <input
+                  id="inputHeight"
+                  type="number"
+                  inputmode="decimal"
+                  min="100"
+                  max="250"
+                  step="0.5"
+                  value="172"
+                  class="w-16 h-10 bg-surface border border-zinc-800 focus:border-gold rounded-xl text-center text-base font-bold text-white outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <button type="button" data-step-target="inputHeight" data-step="1" class="step-btn w-10 h-10 rounded-xl bg-charcoal hover:bg-surface active:scale-95 border border-zinc-800 text-gold-light font-bold text-lg flex items-center justify-center select-none">+</button>
+              </div>
+            </div>
+
+            <!-- Cân nặng (kg) -->
+            <div class="bg-obsidian border border-zinc-800/90 rounded-xl p-2.5 flex items-center justify-between gap-2">
+              <div class="pl-1.5">
+                <label for="inputWeight" class="block text-xs font-semibold text-zinc-200">Cân nặng</label>
+                <span class="text-[11px] text-zinc-500">Đơn vị: kg</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" data-step-target="inputWeight" data-step="-0.5" class="step-btn w-10 h-10 rounded-xl bg-charcoal hover:bg-surface active:scale-95 border border-zinc-800 text-gold-light font-bold text-lg flex items-center justify-center select-none">−</button>
+                <input
+                  id="inputWeight"
+                  type="number"
+                  inputmode="decimal"
+                  min="25"
+                  max="250"
+                  step="0.5"
+                  value="70"
+                  class="w-16 h-10 bg-surface border border-zinc-800 focus:border-gold rounded-xl text-center text-base font-bold text-white outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <button type="button" data-step-target="inputWeight" data-step="0.5" class="step-btn w-10 h-10 rounded-xl bg-charcoal hover:bg-surface active:scale-95 border border-zinc-800 text-gold-light font-bold text-lg flex items-center justify-center select-none">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mục mở rộng: % Mỡ cơ thể (Body Fat %) -->
+          <div class="pt-1 border-t border-zinc-800/80">
+            <button
+              type="button"
+              id="btnToggleBodyFat"
+              class="w-full flex items-center justify-between py-2 text-left group"
+            >
+              <div class="flex items-center gap-2">
+                <span class="w-5 h-5 rounded-md bg-gold/15 border border-gold/30 text-gold-light flex items-center justify-center text-[11px] font-extrabold">%</span>
+                <span class="text-xs font-semibold text-zinc-300 group-hover:text-gold-light transition-colors">
+                  % Mỡ cơ thể (Body Fat %) <span class="text-zinc-500 font-normal">• Tùy chọn</span>
+                </span>
+              </div>
+              <svg id="iconBodyFatChevron" class="w-4 h-4 text-zinc-400 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </button>
+
+            <div id="bodyFatContainer" class="hidden pt-2 space-y-2">
+              <div class="bg-obsidian border border-zinc-800/90 rounded-xl p-2.5 flex items-center justify-between gap-2">
+                <div class="pl-1.5">
+                  <label for="inputBodyFat" class="block text-xs font-semibold text-zinc-200">Body Fat % (InBody)</label>
+                  <span id="lbmPreviewText" class="text-[11px] text-zinc-500">Bỏ trống để dùng Mifflin-St Jeor</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" data-step-target="inputBodyFat" data-step="-1" class="step-btn w-9 h-9 rounded-xl bg-charcoal hover:bg-surface active:scale-95 border border-zinc-800 text-gold-light font-bold flex items-center justify-center select-none">−</button>
+                  <input
+                    id="inputBodyFat"
+                    type="number"
+                    inputmode="decimal"
+                    min="1"
+                    max="69"
+                    step="0.5"
+                    placeholder="--"
+                    class="w-16 h-9 bg-surface border border-zinc-800 focus:border-gold rounded-xl text-center text-sm font-bold text-white placeholder-zinc-600 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                  <button type="button" data-step-target="inputBodyFat" data-step="1" class="step-btn w-9 h-9 rounded-xl bg-charcoal hover:bg-surface active:scale-95 border border-zinc-800 text-gold-light font-bold flex items-center justify-center select-none">+</button>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-[11px] px-1">
+                <span class="text-zinc-500">Nhập &gt;0 và &lt;70 để dùng công thức Katch-McArdle</span>
+                <button type="button" id="btnClearBodyFat" class="text-gold-light hover:underline hidden font-semibold">Xóa % mỡ</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. CHỌN 5 MỨC ĐỘ VẬN ĐỘNG -->
+        <div class="bg-charcoal border border-zinc-800/90 rounded-2xl p-4 space-y-3">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-gold-light flex items-center gap-2">
+            <span class="w-1.5 h-4 rounded-full bg-gradient-to-b from-gold-light to-gold-dark"></span>
+            Mức độ vận động
+          </h2>
+
+          <div id="activityList" class="space-y-2">
+            <!-- Render động bằng JavaScript -->
+          </div>
+        </div>
+
+        <!-- 3. THẺ KẾT QUẢ TDEE, BMR, BMI, LBM (VIỀN VÀNG GOLD) -->
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#241E11] via-charcoal to-obsidian border border-gold/45 p-5 shadow-gold-glow">
+          <div class="pointer-events-none absolute -top-14 -right-14 w-40 h-40 rounded-full bg-gold/15 blur-2xl"></div>
+
+          <div class="relative z-10">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-gold-light">Tổng tiêu thụ năng lượng (TDEE)</span>
+              <span id="resultFormulaTag" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-gold/15 text-gold-light border border-gold/35 shrink-0">
+                Mifflin-St Jeor
+              </span>
+            </div>
+
+            <!-- Giá trị TDEE lớn -->
+            <div class="flex items-baseline gap-2 mt-1">
+              <span id="displayTDEE" class="text-4xl sm:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gold-light via-amber-100 to-gold">
+                2,547
+              </span>
+              <span class="text-sm font-semibold text-zinc-400">kcal / ngày</span>
+            </div>
+
+            <!-- Lưới BMR, BMI và LBM (nếu có) -->
+            <div id="metricsGrid" class="grid grid-cols-2 gap-2.5 mt-4 pt-4 border-t border-gold/20">
+              <div class="bg-obsidian/80 border border-zinc-800/90 rounded-xl p-3">
+                <span class="block text-[11px] font-medium text-zinc-400">Chuyển hóa cơ bản (BMR)</span>
+                <div class="mt-1 flex items-baseline gap-1">
+                  <span id="displayBMR" class="text-lg font-extrabold text-white">1,643</span>
+                  <span class="text-xs text-zinc-400">kcal</span>
+                </div>
+              </div>
+
+              <div class="bg-obsidian/80 border border-zinc-800/90 rounded-xl p-3">
+                <div class="flex items-center justify-between gap-1">
+                  <span class="text-[11px] font-medium text-zinc-400">Chỉ số BMI</span>
+                  <span id="displayBMIStatus" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">Bình thường</span>
+                </div>
+                <div class="mt-1 flex items-baseline gap-1">
+                  <span id="displayBMI" class="text-lg font-extrabold text-white">23.7</span>
+                  <span class="text-xs text-zinc-400">kg/m²</span>
+                </div>
+              </div>
+
+              <!-- Thẻ LBM chỉ hiện khi có nhập % Mỡ -->
+              <div id="lbmMetricCard" class="hidden col-span-2 bg-obsidian/80 border border-gold/30 rounded-xl px-3.5 py-2.5 flex items-center justify-between">
+                <div>
+                  <span class="block text-[11px] font-semibold text-gold-light">Khối lượng cơ nạc (LBM)</span>
+                  <span class="text-[10px] text-zinc-400">Tính theo Body Fat % đã nhập</span>
+                </div>
+                <div class="text-right">
+                  <span id="displayLBM" class="text-lg font-extrabold text-white">56.0</span>
+                  <span class="text-xs text-zinc-400 ml-0.5">kg</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. THẺ LƯỢNG NƯỚC UỐNG KHUYẾN NGHỊ HÀNG NGÀY (HYDRATION) -->
+        <div class="relative overflow-hidden bg-charcoal border border-sky-400/25 rounded-2xl p-4 shadow-cyan-sm space-y-3">
+          <div class="pointer-events-none absolute -bottom-10 -right-10 w-32 h-32 rounded-full bg-sky-500/10 blur-2xl"></div>
+
+          <div class="relative z-10 flex items-start justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-400/30 text-sky-400 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-xs font-bold uppercase tracking-wider text-sky-300">Nước uống khuyến nghị</h2>
+                <p id="waterFormulaDetail" class="text-[11px] text-zinc-400 mt-0.5">Nền 2,450ml + Tập 500ml</p>
+              </div>
+            </div>
+
+            <span id="waterBottleBadge" class="px-2.5 py-1 rounded-xl bg-sky-500/15 border border-sky-400/30 text-xs font-bold text-sky-300 shrink-0">
+              ~6 chai 500ml
+            </span>
+          </div>
+
+          <div class="relative z-10 flex items-baseline justify-between bg-obsidian/80 border border-zinc-800/90 rounded-xl px-3.5 py-3">
+            <div class="flex items-baseline gap-1.5">
+              <span id="displayWaterLiters" class="text-2xl font-black text-white">2.95</span>
+              <span class="text-xs font-bold text-sky-300">Lít / ngày</span>
+            </div>
+            <span id="displayWaterMl" class="text-xs font-semibold text-zinc-400">2,950 ml</span>
+          </div>
+
+          <p class="relative z-10 text-[11px] text-zinc-400 leading-relaxed flex items-start gap-1.5">
+            <svg class="w-3.5 h-3.5 text-gold-light shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>Chia đều nhiều lần trong ngày. Nếu tập cường độ cao hoặc ra nhiều mồ hôi, nhớ bù thêm <strong class="text-zinc-200">300–500ml</strong> nước/điện giải trong buổi tập.</span>
+          </p>
+        </div>
+
+        <!-- 5. 5 NÚT CHỌN NHANH MỤC TIÊU CALO -->
+        <div class="bg-charcoal border border-zinc-800/90 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-gold-light flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full bg-gradient-to-b from-gold-light to-gold-dark"></span>
+              Mục tiêu Calo
+            </h2>
+            <div class="text-right">
+              <span class="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">Calo mục tiêu: </span>
+              <span id="goalHeaderTargetKcal" class="text-sm font-black text-gold-light">2,047 kcal</span>
+            </div>
+          </div>
+
+          <div id="goalList" class="grid grid-cols-1 gap-2">
+            <!-- Render động bằng JavaScript -->
+          </div>
+        </div>
+
+        <!-- 6. CHIA MACRO TRỰC QUAN & TÙY CHỈNH LINH HOẠT -->
+        <div class="bg-charcoal border border-zinc-800/90 rounded-2xl p-4 space-y-4">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-gold-light flex items-center gap-2">
+                <span class="w-1.5 h-4 rounded-full bg-gradient-to-b from-gold-light to-gold-dark"></span>
+                Phân bổ Macro
+              </h2>
+              <p id="macroGoalLabel" class="text-xs text-zinc-400 mt-0.5">Giảm nhanh (-500 kcal)</p>
+            </div>
+            <div class="text-right bg-obsidian border border-gold/30 rounded-xl px-3 py-1.5">
+              <span id="macroTargetKcal" class="text-lg font-black text-gold-light leading-none block">2,047</span>
+              <span class="text-[10px] text-zinc-400 font-semibold">kcal / ngày</span>
+            </div>
+          </div>
+
+          <!-- Thanh tỷ lệ trực quan (Stacked Bar): Đạm - Béo - Tinh bột -->
+          <div class="space-y-2">
+            <div class="w-full h-4 rounded-full overflow-hidden flex bg-obsidian border border-zinc-800 p-0.5 gap-0.5">
+              <div id="barProtein" class="h-full rounded-l-full bg-gradient-to-r from-gold-dark via-gold to-gold-light transition-all duration-300" style="width: 27%;"></div>
+              <div id="barFat" class="h-full bg-rose-400 transition-all duration-300" style="width: 25%;"></div>
+              <div id="barCarb" class="h-full rounded-r-full bg-sky-400 transition-all duration-300" style="width: 48%;"></div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] font-semibold px-0.5">
+              <span class="flex items-center gap-1.5 text-gold-light"><span class="w-2 h-2 rounded-full bg-gold-light"></span>Đạm <span id="legendProteinPct">27%</span></span>
+              <span class="flex items-center gap-1.5 text-rose-400"><span class="w-2 h-2 rounded-full bg-rose-400"></span>Béo <span id="legendFatPct">25%</span></span>
+              <span class="flex items-center gap-1.5 text-sky-400"><span class="w-2 h-2 rounded-full bg-sky-400"></span>Tinh bột <span id="legendCarbPct">48%</span></span>
+            </div>
+          </div>
+
+          <!-- 3 Thẻ kết quả: Đạm (Protein) - Chất béo (Fat) - Tinh bột (Carb) -->
+          <div class="grid grid-cols-3 gap-2">
+            <!-- Đạm -->
+            <div class="bg-obsidian border border-zinc-800/90 rounded-xl p-3 text-center space-y-1">
+              <div class="flex items-center justify-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-gold-light"></span>
+                <span class="text-[11px] font-bold text-zinc-200">Đạm (P)</span>
+              </div>
+              <div class="text-xl font-black text-white"><span id="valProteinG">140</span><span class="text-xs font-semibold text-zinc-400 ml-0.5">g</span></div>
+              <div class="text-[10.5px] text-zinc-400"><span id="valProteinKcal">560</span> kcal</div>
+              <div class="text-[10.5px] font-bold text-gold-light"><span id="valProteinPct">27%</span></div>
+            </div>
+
+            <!-- Chất béo -->
+            <div class="bg-obsidian border border-zinc-800/90 rounded-xl p-3 text-center space-y-1">
+              <div class="flex items-center justify-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+                <span class="text-[11px] font-bold text-zinc-200">Béo (F)</span>
+              </div>
+              <div class="text-xl font-black text-white"><span id="valFatG">57</span><span class="text-xs font-semibold text-zinc-400 ml-0.5">g</span></div>
+              <div class="text-[10.5px] text-zinc-400"><span id="valFatKcal">513</span> kcal</div>
+              <div class="text-[10.5px] font-bold text-rose-400"><span id="valFatPct">25%</span></div>
+            </div>
+
+            <!-- Tinh bột -->
+            <div class="bg-obsidian border border-zinc-800/90 rounded-xl p-3 text-center space-y-1">
+              <div class="flex items-center justify-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                <span class="text-[11px] font-bold text-zinc-200">Carb (C)</span>
+              </div>
+              <div class="text-xl font-black text-white"><span id="valCarbG">244</span><span class="text-xs font-semibold text-zinc-400 ml-0.5">g</span></div>
+              <div class="text-[10.5px] text-zinc-400"><span id="valCarbKcal">976</span> kcal</div>
+              <div class="text-[10.5px] font-bold text-sky-400"><span id="valCarbPct">48%</span></div>
+            </div>
+          </div>
+
+          <!-- Cảnh báo nếu Đạm + Béo vượt tổng Calo mục tiêu -->
+          <div id="carbWarningBox" class="hidden rounded-xl bg-amber-500/10 border border-amber-500/35 p-3 text-xs text-amber-300 flex items-start gap-2">
+            <svg class="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+              <path d="M12 9v4"></path>
+              <path d="M12 17h.01"></path>
+            </svg>
+            <span>Đạm + Chất béo hiện đang vượt tổng Calo mục tiêu nên Tinh bột được giữ ở <strong>0g</strong>. PT nên hạ nhẹ g Đạm/kg hoặc % Chất béo.</span>
+          </div>
+
+          <!-- Thanh trượt Đạm (1.4 - 2.6 g/kg) -->
+          <div class="bg-obsidian border border-zinc-800/90 rounded-xl p-3.5 space-y-2.5">
+            <div class="flex items-center justify-between text-xs gap-2">
+              <label for="proteinSlider" class="font-semibold text-zinc-200">Mức Đạm (Protein)</label>
+              <span id="proteinRatioBadge" class="font-bold text-gold-light bg-gold/15 px-2.5 py-0.5 rounded-lg border border-gold/30">2.0 g/kg</span>
+            </div>
+            <input
+              id="proteinSlider"
+              type="range"
+              min="1.4"
+              max="2.6"
+              step="0.1"
+              value="2.0"
+              class="w-full h-2 bg-surface rounded-lg appearance-none cursor-pointer accent-gold"
+            />
+            <div class="flex justify-between text-[10px] text-zinc-500 font-medium px-0.5">
+              <span>1.4 g/kg</span>
+              <span>2.0 g/kg (Chuẩn PT)</span>
+              <span>2.6 g/kg</span>
+            </div>
+          </div>
+
+          <!-- Thanh trượt Tùy chỉnh % Chất béo (15% - 40%) + 3 nút chọn nhanh + g/kg -->
+          <div class="bg-obsidian border border-zinc-800/90 rounded-xl p-3.5 space-y-2.5">
+            <div class="flex items-center justify-between text-xs gap-2 flex-wrap">
+              <label for="fatSlider" class="font-semibold text-zinc-200">Tỷ lệ Chất béo (Fat %)</label>
+              <div class="flex items-center gap-1.5">
+                <span id="fatPerKgBadge" class="text-[11px] font-semibold text-zinc-300 bg-surface px-2 py-0.5 rounded-lg border border-zinc-700/80">0.81 g/kg</span>
+                <span id="fatPercentBadge" class="font-bold text-rose-300 bg-rose-500/15 px-2.5 py-0.5 rounded-lg border border-rose-400/30">25%</span>
+              </div>
+            </div>
+
+            <input
+              id="fatSlider"
+              type="range"
+              min="15"
+              max="40"
+              step="1"
+              value="25"
+              class="w-full h-2 bg-surface rounded-lg appearance-none cursor-pointer accent-rose-400"
+            />
+
+            <div class="flex items-center justify-between gap-2 pt-0.5">
+              <span class="text-[10.5px] text-zinc-500 font-medium">Chọn nhanh:</span>
+              <div class="grid grid-cols-3 gap-1.5 w-44">
+                <button type="button" data-fat-preset="20" class="fat-preset-btn py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95 bg-surface border-zinc-700 text-zinc-300">20%</button>
+                <button type="button" data-fat-preset="25" class="fat-preset-btn py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95 bg-rose-500/20 border-rose-400 text-rose-300">25%</button>
+                <button type="button" data-fat-preset="30" class="fat-preset-btn py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95 bg-surface border-zinc-700 text-zinc-300">30%</button>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-zinc-500 text-center">
+            Quy đổi: 1g Đạm = 4 kcal • 1g Béo = 9 kcal • 1g Tinh bột = 4 kcal
+          </p>
+        </div>
+
+        <!-- 7. BỘ NÚT TIỆN ÍCH PT -->
+        <div class="space-y-2.5 pt-1">
+          <!-- Sao chép gửi học viên -->
+          <button
+            type="button"
+            id="btnCopyReport"
+            class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-gold-dark via-gold to-gold-light text-obsidian font-extrabold text-sm flex items-center justify-center gap-2 shadow-gold-glow active:scale-[0.98] transition-all"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+            </svg>
+            <span>Sao chép gửi học viên</span>
+          </button>
+
+          <!-- Lưu lịch sử & Làm mới -->
+          <div class="grid grid-cols-2 gap-2.5">
+            <button
+              type="button"
+              id="btnSaveHistory"
+              class="py-3 px-4 rounded-2xl bg-charcoal hover:bg-surface border border-gold/40 text-gold-light font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+              </svg>
+              <span>Lưu lịch sử</span>
+            </button>
+
+            <button
+              type="button"
+              id="btnResetForm"
+              class="py-3 px-4 rounded-2xl bg-charcoal hover:bg-surface border border-zinc-800 text-zinc-300 font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+              </svg>
+              <span>Làm mới</span>
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========== TAB 2: LỊCH SỬ HỌC VIÊN ========== -->
+      <section id="tabHistory" class="hidden space-y-4">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-extrabold text-white">Hồ sơ đã lưu</h2>
+            <p class="text-xs text-zinc-400">Lưu cục bộ trên thiết bị của HLV</p>
+          </div>
+          <button
+            type="button"
+            id="btnClearAllHistory"
+            class="hidden text-xs font-bold text-rose-400 hover:text-rose-300 bg-rose-500/10 border border-rose-500/25 px-3 py-2 rounded-xl active:scale-95 transition-all"
+          >
+            Xóa tất cả
+          </button>
+        </div>
+
+        <!-- Thanh tìm kiếm theo tên học viên -->
+        <div id="historySearchWrap" class="hidden relative">
+          <svg class="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input
+            id="historySearchInput"
+            type="text"
+            placeholder="Tìm theo tên học viên..."
+            class="w-full bg-charcoal border border-zinc-800 focus:border-gold rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all"
+          />
+        </div>
+
+        <!-- Danh sách hồ sơ -->
+        <div id="historyList" class="space-y-3">
+          <!-- Render động bằng JavaScript -->
+        </div>
+
+        <!-- Trạng thái trống -->
+        <div id="historyEmptyState" class="bg-charcoal border border-zinc-800/90 rounded-2xl p-8 text-center space-y-3">
+          <div class="w-14 h-14 mx-auto rounded-2xl bg-obsidian border border-gold/25 flex items-center justify-center text-gold-light">
+            <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 8v4l3 3"></path>
+              <circle cx="12" cy="12" r="9"></circle>
+            </svg>
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-sm font-bold text-zinc-100">Chưa có hồ sơ học viên nào</h3>
+            <p class="text-xs text-zinc-400 leading-relaxed">
+              Sau khi tính chỉ số xong, bấm <span class="text-gold-light font-semibold">"Lưu lịch sử"</span> để dễ dàng nạp lại hoặc gửi Zalo bất cứ lúc nào.
+            </p>
+          </div>
+          <button
+            type="button"
+            id="btnGoToCalcFromEmpty"
+            class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gold/15 border border-gold/40 text-gold-light text-xs font-bold active:scale-95 transition-all"
+          >
+            Tính TDEE ngay
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ==================== THANH ĐIỀU HƯỚNG CỐ ĐỊNH DƯỚI ĐÁY ==================== -->
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-30 bg-obsidian/95 backdrop-blur-lg border-t border-zinc-800/90 px-4 py-2">
+      <div class="grid grid-cols-2 gap-2.5">
+        <button
+          type="button"
+          id="navTabCalc"
+          class="flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-gold-light bg-gold/15 border border-gold/30 transition-all active:scale-95"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="16" height="20" x="4" y="2" rx="2"></rect>
+            <line x1="8" x2="16" y1="6" y2="6"></line>
+            <line x1="16" x2="16" y1="14" y2="18"></line>
+            <path d="M16 10h.01"></path>
+            <path d="M12 10h.01"></path>
+            <path d="M8 10h.01"></path>
+            <path d="M12 14h.01"></path>
+            <path d="M8 14h.01"></path>
+            <path d="M12 18h.01"></path>
+            <path d="M8 18h.01"></path>
+          </svg>
+          <span class="text-xs font-bold">Tính TDEE</span>
+        </button>
+
+        <button
+          type="button"
+          id="navTabHistory"
+          class="relative flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-zinc-400 hover:text-zinc-200 border border-transparent transition-all active:scale-95"
+        >
+          <div class="relative">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+              <path d="M12 7v5l4 2"></path>
+            </svg>
+            <span id="historyCountBadge" class="hidden absolute -top-1.5 -right-3.5 min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-obsidian text-[10px] font-black flex items-center justify-center">0</span>
+          </div>
+          <span class="text-xs font-bold">Lịch sử</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ==================== MODAL TÙY CHỈNH THƯƠNG HIỆU ==================== -->
+    <div id="brandModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="w-full max-w-[400px] bg-charcoal border border-gold/35 rounded-2xl p-5 space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+          <div>
+            <h3 class="text-base font-extrabold text-gold-light">Tùy chỉnh thương hiệu</h3>
+            <p class="text-[11px] text-zinc-400 mt-0.5">Hiển thị trên App và tin nhắn gửi khách hàng</p>
+          </div>
+          <button type="button" id="btnCloseBrandModal" class="w-8 h-8 rounded-lg bg-obsidian border border-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <form id="brandForm" class="space-y-3.5">
+          <div>
+            <label for="inputBrandName" class="block text-xs font-semibold text-zinc-300 mb-1.5">Tên phòng gym / Thương hiệu</label>
+            <input
+              id="inputBrandName"
+              type="text"
+              maxlength="40"
+              placeholder="DKT PRIVATE GYM"
+              class="w-full bg-obsidian border border-zinc-800 focus:border-gold rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label for="inputBrandSubtitle" class="block text-xs font-semibold text-zinc-300 mb-1.5">Thông tin phụ / Hotline</label>
+            <input
+              id="inputBrandSubtitle"
+              type="text"
+              maxlength="60"
+              placeholder="TDEE • MACRO • HYDRATION hoặc SĐT/Địa chỉ"
+              class="w-full bg-obsidian border border-zinc-800 focus:border-gold rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label for="inputBrandCoach" class="block text-xs font-semibold text-zinc-300 mb-1.5">Tên Huấn Luyện Viên (Chữ ký gửi khách)</label>
+            <input
+              id="inputBrandCoach"
+              type="text"
+              maxlength="45"
+              placeholder="VD: HLV Quốc Bảo • 0909 xxx xxx"
+              class="w-full bg-obsidian border border-zinc-800 focus:border-gold rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none"
+            />
+          </div>
+
+          <div class="flex items-center justify-between pt-2 gap-2.5">
+            <button
+              type="button"
+              id="btnResetBrandDefault"
+              class="px-3.5 py-2.5 rounded-xl bg-obsidian border border-zinc-800 text-xs font-semibold text-zinc-400 hover:text-zinc-200 active:scale-95 transition-all"
+            >
+              Mặc định
+            </button>
+            <button
+              type="submit"
+              class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-gold-dark via-gold to-gold-light text-obsidian font-extrabold text-sm shadow-gold-sm active:scale-95 transition-all"
+            >
+              Lưu thương hiệu
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ==================== MODAL XÁC NHẬN XÓA TẤT CẢ LỊCH SỬ ==================== -->
+    <div id="confirmModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="w-full max-w-[360px] bg-charcoal border border-zinc-700 rounded-2xl p-5 space-y-4 shadow-2xl">
+        <div class="space-y-1.5">
+          <h3 class="text-base font-extrabold text-white">Xóa toàn bộ lịch sử?</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Thao tác này sẽ xóa toàn bộ hồ sơ học viên đã lưu trên thiết bị và không thể khôi phục. Cài đặt thương hiệu phòng gym vẫn được giữ nguyên.
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <button
+            type="button"
+            id="btnCancelClearAll"
+            class="py-2.5 px-4 rounded-xl bg-obsidian border border-zinc-700 text-zinc-300 text-sm font-semibold active:scale-95 transition-all"
+          >
+            Hủy
+          </button>
+          <button
+            type="button"
+            id="btnConfirmClearAll"
+            class="py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold active:scale-95 transition-all"
+          >
+            Xóa tất cả
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TOAST THÔNG BÁO ==================== -->
+    <div class="pointer-events-none fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[420px] flex justify-center">
+      <div id="toastBox" class="opacity-0 -translate-y-3 transition-all duration-200 bg-charcoal/95 backdrop-blur-md border border-gold/50 text-white px-4 py-3 rounded-2xl shadow-gold-glow flex items-center gap-2.5 text-xs font-semibold">
+        <span class="w-5 h-5 rounded-full bg-gold/20 text-gold-light flex items-center justify-center shrink-0">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </span>
+        <span id="toastMessage">Đã sao chép báo cáo!</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== JAVASCRIPT XỬ LÝ LOGIC ==================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      // ==========================================================
+      // 1. HẰNG SỐ & DỮ LIỆU CHUẨN
+      // ==========================================================
+      const STORAGE_HISTORY_KEY = 'dkt_gym_tdee_history_v2';
+      const STORAGE_BRAND_KEY = 'dkt_gym_brand_settings_v1';
+
+      const DEFAULT_BRAND = {
+        gymName: 'DKT PRIVATE GYM',
+        subtitle: 'TDEE • MACRO • HYDRATION',
+        coachName: '',
+      };
+
+      // 5 mức vận động kèm lượng nước bù thêm (ml)
+      const ACTIVITY_LEVELS = [
+        {
+          value: 1.2,
+          title: 'Ít vận động',
+          desc: 'Công việc văn phòng, ít đi lại, không tập luyện',
+          badge: 'x1.2',
+          extraWaterMl: 0,
+        },
+        {
+          value: 1.375,
+          title: 'Tập nhẹ (1 – 3 buổi/tuần)',
+          desc: 'Tập gym hoặc thể thao cường độ nhẹ nhàng',
+          badge: 'x1.375',
+          extraWaterMl: 300,
+        },
+        {
+          value: 1.55,
+          title: 'Vừa (3 – 5 buổi/tuần)',
+          desc: 'Tập gym đều đặn hàng tuần cường độ trung bình',
+          badge: 'x1.55',
+          extraWaterMl: 500,
+        },
+        {
+          value: 1.725,
+          title: 'Nặng (6 – 7 buổi/tuần)',
+          desc: 'Tập tạ / cardio cường độ cao hầu hết các ngày',
+          badge: 'x1.725',
+          extraWaterMl: 750,
+        },
+        {
+          value: 1.9,
+          title: 'Rất nặng / VĐV',
+          desc: 'Tập 2 buổi/ngày hoặc lao động thể lực cường độ cao',
+          badge: 'x1.9',
+          extraWaterMl: 1000,
+        },
+      ];
+
+      // 5 mục tiêu Calo theo thứ tự rõ ràng
+      const GOALS = [
+        {
+          id: 'cut_fast',
+          label: 'Giảm nhanh',
+          offset: -500,
+          tag: '-500 kcal',
+          desc: 'Thâm hụt tiêu chuẩn (~0.5 kg/tuần)',
+          tagClass: 'text-sky-400 bg-sky-500/15 border-sky-400/30',
+        },
+        {
+          id: 'cut_mild',
+          label: 'Giảm nhẹ',
+          offset: -300,
+          tag: '-300 kcal',
+          desc: 'Giảm mỡ bền vững, giữ cơ tối đa',
+          tagClass: 'text-emerald-400 bg-emerald-500/15 border-emerald-400/30',
+        },
+        {
+          id: 'maintain',
+          label: 'Giữ cân',
+          offset: 0,
+          tag: 'TDEE',
+          desc: 'Duy trì cân nặng hoặc Body Recomp',
+          tagClass: 'text-gold-light bg-gold/15 border-gold/35',
+        },
+        {
+          id: 'bulk_lean',
+          label: 'Tăng sạch',
+          offset: 250,
+          tag: '+250 kcal',
+          desc: 'Tăng cơ nạc, hạn chế tích mỡ thừa',
+          tagClass: 'text-amber-400 bg-amber-500/15 border-amber-400/30',
+        },
+        {
+          id: 'bulk_fast',
+          label: 'Tăng nhanh',
+          offset: 450,
+          tag: '+450 kcal',
+          desc: 'Dành cho người gầy cần tăng cân nhanh',
+          tagClass: 'text-rose-400 bg-rose-500/15 border-rose-400/30',
+        },
+      ];
+
+      const DEFAULT_STATE = {
+        clientName: '',
+        gender: 'male',
+        age: 28,
+        height: 172,
+        weight: 70,
+        bodyFat: '',
+        activity: 1.55,
+        goalId: 'cut_fast',
+        proteinPerKg: 2.0,
+        fatPercent: 25,
+      };
+
+      // ==========================================================
+      // 2. TRẠNG THÁI ỨNG DỤNG
+      // ==========================================================
+      let brand = { ...DEFAULT_BRAND };
+      let state = { ...DEFAULT_STATE };
+      let currentCalc = null;
+      let historyItems = [];
+      let toastTimer = null;
+
+      // ==========================================================
+      // 3. TRUY XUẤT PHẦN TỬ DOM
+      // ==========================================================
+      const el = {
+        // Header & Brand
+        headerBrandMonogram: document.getElementById('headerBrandMonogram'),
+        headerGymName: document.getElementById('headerGymName'),
+        headerGymSubtitle: document.getElementById('headerGymSubtitle'),
+        headerCoachTag: document.getElementById('headerCoachTag'),
+        btnOpenBrandModal: document.getElementById('btnOpenBrandModal'),
+        brandModal: document.getElementById('brandModal'),
+        btnCloseBrandModal: document.getElementById('btnCloseBrandModal'),
+        brandForm: document.getElementById('brandForm'),
+        inputBrandName: document.getElementById('inputBrandName'),
+        inputBrandSubtitle: document.getElementById('inputBrandSubtitle'),
+        inputBrandCoach: document.getElementById('inputBrandCoach'),
+        btnResetBrandDefault: document.getElementById('btnResetBrandDefault'),
+        pwaManifestLink: document.getElementById('pwaManifestLink'),
+
+        // Tabs
+        tabCalculator: document.getElementById('tabCalculator'),
+        tabHistory: document.getElementById('tabHistory'),
+        navTabCalc: document.getElementById('navTabCalc'),
+        navTabHistory: document.getElementById('navTabHistory'),
+        historyCountBadge: document.getElementById('historyCountBadge'),
+
+        // Inputs
+        clientName: document.getElementById('clientName'),
+        btnGenderMale: document.getElementById('btnGenderMale'),
+        btnGenderFemale: document.getElementById('btnGenderFemale'),
+        inputAge: document.getElementById('inputAge'),
+        inputHeight: document.getElementById('inputHeight'),
+        inputWeight: document.getElementById('inputWeight'),
+        inputBodyFat: document.getElementById('inputBodyFat'),
+        btnToggleBodyFat: document.getElementById('btnToggleBodyFat'),
+        iconBodyFatChevron: document.getElementById('iconBodyFatChevron'),
+        bodyFatContainer: document.getElementById('bodyFatContainer'),
+        btnClearBodyFat: document.getElementById('btnClearBodyFat'),
+        lbmPreviewText: document.getElementById('lbmPreviewText'),
+        formulaBadge: document.getElementById('formulaBadge'),
+
+        // Lists
+        activityList: document.getElementById('activityList'),
+        goalList: document.getElementById('goalList'),
+        goalHeaderTargetKcal: document.getElementById('goalHeaderTargetKcal'),
+
+        // Result Display
+        resultFormulaTag: document.getElementById('resultFormulaTag'),
+        displayTDEE: document.getElementById('displayTDEE'),
+        displayBMR: document.getElementById('displayBMR'),
+        displayBMI: document.getElementById('displayBMI'),
+        displayBMIStatus: document.getElementById('displayBMIStatus'),
+        lbmMetricCard: document.getElementById('lbmMetricCard'),
+        displayLBM: document.getElementById('displayLBM'),
+
+        // Hydration Display
+        waterFormulaDetail: document.getElementById('waterFormulaDetail'),
+        waterBottleBadge: document.getElementById('waterBottleBadge'),
+        displayWaterLiters: document.getElementById('displayWaterLiters'),
+        displayWaterMl: document.getElementById('displayWaterMl'),
+
+        // Macro Display
+        macroGoalLabel: document.getElementById('macroGoalLabel'),
+        macroTargetKcal: document.getElementById('macroTargetKcal'),
+        barProtein: document.getElementById('barProtein'),
+        barFat: document.getElementById('barFat'),
+        barCarb: document.getElementById('barCarb'),
+        legendProteinPct: document.getElementById('legendProteinPct'),
+        legendFatPct: document.getElementById('legendFatPct'),
+        legendCarbPct: document.getElementById('legendCarbPct'),
+        valProteinG: document.getElementById('valProteinG'),
+        valProteinKcal: document.getElementById('valProteinKcal'),
+        valProteinPct: document.getElementById('valProteinPct'),
+        valFatG: document.getElementById('valFatG'),
+        valFatKcal: document.getElementById('valFatKcal'),
+        valFatPct: document.getElementById('valFatPct'),
+        valCarbG: document.getElementById('valCarbG'),
+        valCarbKcal: document.getElementById('valCarbKcal'),
+        valCarbPct: document.getElementById('valCarbPct'),
+        carbWarningBox: document.getElementById('carbWarningBox'),
+        proteinSlider: document.getElementById('proteinSlider'),
+        proteinRatioBadge: document.getElementById('proteinRatioBadge'),
+        fatSlider: document.getElementById('fatSlider'),
+        fatPercentBadge: document.getElementById('fatPercentBadge'),
+        fatPerKgBadge: document.getElementById('fatPerKgBadge'),
+
+        // PT Action Buttons
+        btnCopyReport: document.getElementById('btnCopyReport'),
+        btnSaveHistory: document.getElementById('btnSaveHistory'),
+        btnResetForm: document.getElementById('btnResetForm'),
+
+        // History Tab
+        historyList: document.getElementById('historyList'),
+        historyEmptyState: document.getElementById('historyEmptyState'),
+        historySearchWrap: document.getElementById('historySearchWrap'),
+        historySearchInput: document.getElementById('historySearchInput'),
+        btnClearAllHistory: document.getElementById('btnClearAllHistory'),
+        btnGoToCalcFromEmpty: document.getElementById('btnGoToCalcFromEmpty'),
+
+        // Confirm Modal & Toast
+        confirmModal: document.getElementById('confirmModal'),
+        btnCancelClearAll: document.getElementById('btnCancelClearAll'),
+        btnConfirmClearAll: document.getElementById('btnConfirmClearAll'),
+        toastBox: document.getElementById('toastBox'),
+        toastMessage: document.getElementById('toastMessage'),
+      };
+
+      // ==========================================================
+      // 4. HÀM TIỆN ÍCH CHUNG
+      // ==========================================================
+      function formatNumber(num) {
+        if (!Number.isFinite(num)) return '0';
+        return Math.round(num).toLocaleString('en-US');
+      }
+
+      function escapeHTML(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function showToast(message) {
+        el.toastMessage.textContent = message;
+        el.toastBox.classList.remove('opacity-0', '-translate-y-3');
+        el.toastBox.classList.add('opacity-100', 'translate-y-0');
+
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          el.toastBox.classList.remove('opacity-100', 'translate-y-0');
+          el.toastBox.classList.add('opacity-0', '-translate-y-3');
+        }, 2600);
+      }
+
+      // Sao chép an toàn trong iFrame & trình duyệt di động bằng document.execCommand('copy')
+      function copyTextToClipboard(text) {
+        try {
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.setAttribute('readonly', '');
+          textarea.style.position = 'fixed';
+          textarea.style.top = '-9999px';
+          textarea.style.left = '-9999px';
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+          textarea.setSelectionRange(0, text.length);
+
+          const ok = document.execCommand('copy');
+          document.body.removeChild(textarea);
+          if (ok) return true;
+
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text);
+            return true;
+          }
+          return false;
+        } catch (err) {
+          console.error('Lỗi sao chép:', err);
+          return false;
+        }
+      }
+
+      function getBMICategory(bmi) {
+        if (bmi < 18.5) return { label: 'Thiếu cân', cls: 'bg-sky-500/15 text-sky-400' };
+        if (bmi < 25) return { label: 'Bình thường', cls: 'bg-emerald-500/15 text-emerald-400' };
+        if (bmi < 30) return { label: 'Thừa cân', cls: 'bg-amber-500/15 text-amber-400' };
+        return { label: 'Béo phì', cls: 'bg-rose-500/15 text-rose-400' };
+      }
+
+      function getMonogramFromName(name) {
+        const clean = (name || '').trim();
+        if (!clean) return 'DKT';
+        const words = clean.split(/\s+/).filter(Boolean);
+        if (words.length === 1) {
+          return words[0].slice(0, 3).toUpperCase();
+        }
+        return words
+          .slice(0, 3)
+          .map((w) => w[0])
+          .join('')
+          .toUpperCase();
+      }
+
+      // ==========================================================
+      // 5. QUẢN LÝ THƯƠNG HIỆU PHÒNG GYM (LOCALSTORAGE)
+      // ==========================================================
+      function loadBrandSettings() {
+        try {
+          const raw = localStorage.getItem(STORAGE_BRAND_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            brand = {
+              gymName: (parsed.gymName || '').trim() || DEFAULT_BRAND.gymName,
+              subtitle: (parsed.subtitle || '').trim() || DEFAULT_BRAND.subtitle,
+              coachName: (parsed.coachName || '').trim(),
+            };
+          }
+        } catch (err) {
+          console.error('Lỗi đọc cài đặt thương hiệu:', err);
+          brand = { ...DEFAULT_BRAND };
+        }
+        applyBrandToUI();
+      }
+
+      function saveBrandSettings() {
+        try {
+          localStorage.setItem(STORAGE_BRAND_KEY, JSON.stringify(brand));
+        } catch (err) {
+          console.error('Lỗi lưu cài đặt thương hiệu:', err);
+        }
+      }
+
+      function applyBrandToUI() {
+        const gymName = brand.gymName || DEFAULT_BRAND.gymName;
+        const subtitle = brand.subtitle || DEFAULT_BRAND.subtitle;
+        const coachName = brand.coachName || '';
+
+        el.headerGymName.textContent = gymName;
+        el.headerGymSubtitle.textContent = subtitle;
+        el.headerBrandMonogram.textContent = getMonogramFromName(gymName);
+        document.title = `${gymName} — Tính Nhanh TDEE & Macro`;
+
+        if (coachName) {
+          el.headerCoachTag.textContent = `HLV: ${coachName}`;
+          el.headerCoachTag.classList.remove('hidden');
+        } else {
+          el.headerCoachTag.classList.add('hidden');
+        }
+
+        // Cập nhật động Web App Manifest theo tên phòng gym
+        try {
+          const manifestObj = {
+            name: `${gymName} — Tính Nhanh TDEE & Macro`,
+            short_name: gymName.slice(0, 14),
+            start_url: '.',
+            display: 'standalone',
+            background_color: '#0D0D0F',
+            theme_color: '#0D0D0F',
+            orientation: 'portrait',
+          };
+          el.pwaManifestLink.setAttribute(
+            'href',
+            'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifestObj))
+          );
+        } catch (err) {
+          // Bỏ qua nếu trình duyệt không hỗ trợ cập nhật động manifest
+        }
+      }
+
+      function openBrandModal() {
+        el.inputBrandName.value = brand.gymName;
+        el.inputBrandSubtitle.value = brand.subtitle;
+        el.inputBrandCoach.value = brand.coachName;
+        el.brandModal.classList.remove('hidden');
+      }
+
+      function closeBrandModal() {
+        el.brandModal.classList.add('hidden');
+      }
+
+      // ==========================================================
+      // 6. TÍNH TOÁN CHÍNH XÁC BMR, TDEE, BMI, LBM, NƯỚC & MACRO
+      // ==========================================================
+      function calculateMetrics(inputState) {
+        const age = Math.max(10, Math.min(100, Number(inputState.age) || 28));
+        const height = Math.max(100, Math.min(250, Number(inputState.height) || 172));
+        const weight = Math.max(25, Math.min(250, Number(inputState.weight) || 70));
+        const activity = Number(inputState.activity) || 1.55;
+        const proteinPerKg = Math.max(1.4, Math.min(2.6, Number(inputState.proteinPerKg) || 2.0));
+        const fatPercent = Math.max(15, Math.min(40, Number(inputState.fatPercent) || 25));
+
+        const parsedBF =
+          inputState.bodyFat !== '' && inputState.bodyFat !== null && inputState.bodyFat !== undefined
+            ? Number(inputState.bodyFat)
+            : NaN;
+        const useKatchMcArdle = Number.isFinite(parsedBF) && parsedBF > 0 && parsedBF < 70;
+
+        let bmr = 0;
+        let lbm = null;
+        let formulaName = 'Mifflin-St Jeor';
+
+        if (useKatchMcArdle) {
+          lbm = weight * (1 - parsedBF / 100);
+          bmr = 370 + 21.6 * lbm;
+          formulaName = 'Katch-McArdle';
+        } else {
+          const base = 10 * weight + 6.25 * height - 5 * age;
+          bmr = inputState.gender === 'male' ? base + 5 : base - 161;
+        }
+
+        bmr = Math.max(500, bmr);
+        const bmrRounded = Math.round(bmr);
+        const tdeeRounded = Math.round(bmr * activity);
+
+        // BMI
+        const heightM = height / 100;
+        const bmi = weight / (heightM * heightM);
+        const bmiInfo = getBMICategory(bmi);
+
+        // Lượng nước uống khuyến nghị hàng ngày:
+        // Nền 35 ml/kg cân nặng + cộng thêm theo mức độ vận động
+        const activityObj = ACTIVITY_LEVELS.find((a) => a.value === activity) || ACTIVITY_LEVELS[2];
+        const baseWaterMl = Math.round(weight * 35);
+        const extraWaterMl = activityObj.extraWaterMl;
+        const totalWaterMl = baseWaterMl + extraWaterMl;
+        const waterLiters = Number((totalWaterMl / 1000).toFixed(2));
+        const waterBottles = Math.max(1, Math.round(totalWaterMl / 500));
+
+        // Mục tiêu Calo
+        const selectedGoal = GOALS.find((g) => g.id === inputState.goalId) || GOALS[0];
+        const targetKcal = Math.max(0, tdeeRounded + selectedGoal.offset);
+
+        // Phân bổ Macro:
+        // Đạm theo g/kg (1.4 - 2.6), Chất béo theo % tổng calo (15% - 40%), Tinh bột lấy phần còn lại >= 0
+        const proteinG = Math.round(weight * proteinPerKg);
+        const proteinKcal = proteinG * 4;
+
+        const fatG = Math.round((targetKcal * (fatPercent / 100)) / 9);
+        const fatKcal = fatG * 9;
+        const fatPerKg = Number((fatG / weight).toFixed(2));
+
+        const rawRemainingKcal = targetKcal - proteinKcal - fatKcal;
+        const carbNegativeClamped = rawRemainingKcal < 0;
+        const carbG = Math.max(0, Math.round(rawRemainingKcal / 4));
+        const carbKcal = carbG * 4;
+
+        // Tỷ lệ % hiển thị thanh Stacked Bar (đảm bảo tổng luôn 100%)
+        const totalMacroKcal = Math.max(1, proteinKcal + fatKcal + carbKcal);
+        const proteinPct = Math.round((proteinKcal / totalMacroKcal) * 100);
+        const fatPct = Math.round((fatKcal / totalMacroKcal) * 100);
+        const carbPct = Math.max(0, 100 - proteinPct - fatPct);
+
+        return {
+          age,
+          height,
+          weight,
+          gender: inputState.gender,
+          bodyFat: useKatchMcArdle ? parsedBF : null,
+          lbm: lbm !== null ? Number(lbm.toFixed(1)) : null,
+          formulaName,
+          activity,
+          activityTitle: activityObj.title,
+          bmr: bmrRounded,
+          tdee: tdeeRounded,
+          bmi: Number(bmi.toFixed(1)),
+          bmiInfo,
+          water: {
+            baseWaterMl,
+            extraWaterMl,
+            totalWaterMl,
+            waterLiters,
+            waterBottles,
+          },
+          goal: selectedGoal,
+          targetKcal,
+          proteinPerKg,
+          fatPercent,
+          macros: {
+            proteinG,
+            proteinKcal,
+            proteinPct,
+            fatG,
+            fatKcal,
+            fatPct,
+            fatPerKg,
+            carbG,
+            carbKcal,
+            carbPct,
+            carbNegativeClamped,
+          },
+        };
+      }
+
+      // ==========================================================
+      // 7. CẬP NHẬT GIAO DIỆN (RENDER)
+      // ==========================================================
+      function renderGenderButtons() {
+        const isMale = state.gender === 'male';
+        const activeCls = ['bg-gold/15', 'border-gold', 'text-gold-light', 'shadow-gold-sm'];
+        const inactiveCls = ['bg-obsidian', 'border-zinc-800', 'text-zinc-400', 'hover:border-zinc-700'];
+
+        el.btnGenderMale.classList.remove(...(isMale ? inactiveCls : activeCls));
+        el.btnGenderMale.classList.add(...(isMale ? activeCls : inactiveCls));
+
+        el.btnGenderFemale.classList.remove(...(!isMale ? inactiveCls : activeCls));
+        el.btnGenderFemale.classList.add(...(!isMale ? activeCls : inactiveCls));
+      }
+
+      function renderActivityList() {
+        el.activityList.innerHTML = ACTIVITY_LEVELS.map((item) => {
+          const isSelected = Number(state.activity) === item.value;
+          return `
+            <button
+              type="button"
+              data-activity="${item.value}"
+              class="activity-item w-full text-left p-3 rounded-xl border transition-all active:scale-[0.99] flex items-center justify-between gap-3 ${
+                isSelected
+                  ? 'bg-gold/15 border-gold shadow-gold-sm'
+                  : 'bg-obsidian border-zinc-800/90 hover:border-zinc-700'
+              }"
+            >
+              <div class="flex items-start gap-2.5 min-w-0">
+                <span class="mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                  isSelected ? 'border-gold-light' : 'border-zinc-600'
+                }">
+                  ${isSelected ? '<span class="w-2 h-2 rounded-full bg-gold-light"></span>' : ''}
+                </span>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold ${isSelected ? 'text-gold-light' : 'text-zinc-200'}">${item.title}</div>
+                  <div class="text-[11px] text-zinc-400 leading-snug mt-0.5">${item.desc}</div>
+                </div>
+              </div>
+              <span class="text-[11px] font-extrabold px-2 py-1 rounded-lg shrink-0 ${
+                isSelected ? 'bg-gold text-obsidian' : 'bg-surface text-zinc-400 border border-zinc-800'
+              }">${item.badge}</span>
+            </button>
+          `;
+        }).join('');
+      }
+
+      function renderGoalList(tdee) {
+        el.goalList.innerHTML = GOALS.map((goal) => {
+          const isSelected = state.goalId === goal.id;
+          const kcalVal = Math.max(0, tdee + goal.offset);
+          return `
+            <button
+              type="button"
+              data-goal="${goal.id}"
+              class="goal-item w-full text-left p-3 rounded-xl border transition-all active:scale-[0.99] flex items-center justify-between gap-2 ${
+                isSelected
+                  ? 'bg-gold/15 border-gold shadow-gold-sm'
+                  : 'bg-obsidian border-zinc-800/90 hover:border-zinc-700'
+              }"
+            >
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-xs font-extrabold ${isSelected ? 'text-gold-light' : 'text-zinc-100'}">${goal.label}</span>
+                  <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${goal.tagClass}">${goal.tag}</span>
+                </div>
+                <p class="text-[11px] text-zinc-400 mt-0.5 truncate">${goal.desc}</p>
+              </div>
+              <div class="text-right shrink-0 pl-2">
+                <div class="text-sm font-black ${isSelected ? 'text-gold-light' : 'text-white'}">${formatNumber(kcalVal)}</div>
+                <div class="text-[10px] text-zinc-500 font-medium">kcal/ngày</div>
+              </div>
+            </button>
+          `;
+        }).join('');
+      }
+
+      function renderFatPresetButtons() {
+        document.querySelectorAll('.fat-preset-btn').forEach((btn) => {
+          const val = Number(btn.dataset.fatPreset);
+          const isActive = Number(state.fatPercent) === val;
+          btn.className = `fat-preset-btn py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95 ${
+            isActive
+              ? 'bg-rose-500/20 border-rose-400 text-rose-300'
+              : 'bg-surface border-zinc-700 text-zinc-300 hover:border-zinc-500'
+          }`;
+        });
+      }
+
+      function updateAllCalculations() {
+        currentCalc = calculateMetrics(state);
+
+        // 1. Nhãn công thức & LBM
+        el.formulaBadge.textContent = currentCalc.formulaName;
+        el.resultFormulaTag.textContent = currentCalc.formulaName;
+
+        if (currentCalc.lbm !== null) {
+          el.lbmPreviewText.textContent = `Khối lượng cơ nạc (LBM): ${currentCalc.lbm} kg`;
+          el.lbmPreviewText.classList.remove('text-zinc-500');
+          el.lbmPreviewText.classList.add('text-gold-light');
+          el.btnClearBodyFat.classList.remove('hidden');
+
+          el.displayLBM.textContent = currentCalc.lbm.toFixed(1);
+          el.lbmMetricCard.classList.remove('hidden');
+        } else {
+          el.lbmPreviewText.textContent = 'Bỏ trống để dùng Mifflin-St Jeor';
+          el.lbmPreviewText.classList.add('text-zinc-500');
+          el.lbmPreviewText.classList.remove('text-gold-light');
+          el.btnClearBodyFat.classList.add('hidden');
+          el.lbmMetricCard.classList.add('hidden');
+        }
+
+        // 2. Thẻ TDEE, BMR, BMI
+        el.displayTDEE.textContent = formatNumber(currentCalc.tdee);
+        el.displayBMR.textContent = formatNumber(currentCalc.bmr);
+        el.displayBMI.textContent = currentCalc.bmi.toFixed(1);
+        el.displayBMIStatus.textContent = currentCalc.bmiInfo.label;
+        el.displayBMIStatus.className = `text-[10px] font-bold px-1.5 py-0.5 rounded ${currentCalc.bmiInfo.cls}`;
+
+        // 3. Thẻ Lượng Nước Uống (Hydration)
+        const w = currentCalc.water;
+        el.displayWaterLiters.textContent = w.waterLiters.toFixed(2);
+        el.displayWaterMl.textContent = `${formatNumber(w.totalWaterMl)} ml`;
+        el.waterBottleBadge.textContent = `~${w.waterBottles} chai 500ml`;
+        el.waterFormulaDetail.textContent =
+          w.extraWaterMl > 0
+            ? `Nền ${formatNumber(w.baseWaterMl)}ml + Tập ${formatNumber(w.extraWaterMl)}ml`
+            : `Nền ${formatNumber(w.baseWaterMl)}ml (35ml/kg)`;
+
+        // 4. Danh sách 5 mục tiêu Calo
+        el.goalHeaderTargetKcal.textContent = `${formatNumber(currentCalc.targetKcal)} kcal`;
+        renderGoalList(currentCalc.tdee);
+
+        // 5. Phân bổ Macro
+        const m = currentCalc.macros;
+        el.macroGoalLabel.textContent = `${currentCalc.goal.label} (${currentCalc.goal.tag})`;
+        el.macroTargetKcal.textContent = formatNumber(currentCalc.targetKcal);
+
+        el.proteinRatioBadge.textContent = `${currentCalc.proteinPerKg.toFixed(1)} g/kg`;
+        el.fatPercentBadge.textContent = `${currentCalc.fatPercent}%`;
+        el.fatPerKgBadge.textContent = `${m.fatPerKg.toFixed(2)} g/kg`;
+        renderFatPresetButtons();
+
+        // Thanh tỷ lệ Đạm - Béo - Tinh bột
+        el.barProtein.style.width = `${m.proteinPct}%`;
+        el.barFat.style.width = `${m.fatPct}%`;
+        el.barCarb.style.width = `${m.carbPct}%`;
+
+        el.legendProteinPct.textContent = `${m.proteinPct}%`;
+        el.legendFatPct.textContent = `${m.fatPct}%`;
+        el.legendCarbPct.textContent = `${m.carbPct}%`;
+
+        // 3 thẻ kết quả Macro
+        el.valProteinG.textContent = m.proteinG;
+        el.valProteinKcal.textContent = formatNumber(m.proteinKcal);
+        el.valProteinPct.textContent = `${m.proteinPct}%`;
+
+        el.valFatG.textContent = m.fatG;
+        el.valFatKcal.textContent = formatNumber(m.fatKcal);
+        el.valFatPct.textContent = `${m.fatPct}%`;
+
+        el.valCarbG.textContent = m.carbG;
+        el.valCarbKcal.textContent = formatNumber(m.carbKcal);
+        el.valCarbPct.textContent = `${m.carbPct}%`;
+
+        // Cảnh báo Carb = 0g
+        el.carbWarningBox.classList.toggle('hidden', !m.carbNegativeClamped);
+      }
+
+      function syncInputsFromState() {
+        el.clientName.value = state.clientName;
+        el.inputAge.value = state.age;
+        el.inputHeight.value = state.height;
+        el.inputWeight.value = state.weight;
+        el.inputBodyFat.value = state.bodyFat;
+        el.proteinSlider.value = state.proteinPerKg;
+        el.fatSlider.value = state.fatPercent;
+
+        if (state.bodyFat !== '' && state.bodyFat !== null) {
+          el.bodyFatContainer.classList.remove('hidden');
+          el.iconBodyFatChevron.classList.add('rotate-180');
+        }
+
+        renderGenderButtons();
+        renderActivityList();
+        updateAllCalculations();
+      }
+
+      // ==========================================================
+      // 8. MẪU BÁO CÁO CHUYÊN NGHIỆP GỬI ZALO / MESSENGER
+      // ==========================================================
+      function buildClientReport(calc, clientNameRaw) {
+        const displayName = (clientNameRaw || '').trim() || 'Học viên';
+        const genderText = calc.gender === 'male' ? 'Nam' : 'Nữ';
+        const gymName = (brand.gymName || DEFAULT_BRAND.gymName).toUpperCase();
+        const subtitle = (brand.subtitle || '').trim();
+        const coachName = (brand.coachName || '').trim();
+
+        const bfPart =
+          calc.bodyFat !== null ? ` • Mỡ: ${calc.bodyFat}% (LBM: ${calc.lbm}kg)` : '';
+
+        const lines = [
+          `🏆 ${gymName}`,
+          ...(subtitle ? [`✨ ${subtitle}`] : []),
+          `━━━━━━━━━━━━━━━━━━`,
+          `📋 BẢNG CHỈ SỐ DINH DƯỠNG — ${displayName.toUpperCase()}`,
+          `👤 ${genderText}, ${calc.age} tuổi • ${calc.height}cm • ${calc.weight}kg${bfPart}`,
+          `🔥 BMR: ${formatNumber(calc.bmr)} kcal | ⚡ TDEE: ${formatNumber(calc.tdee)} kcal`,
+          `📊 BMI: ${calc.bmi.toFixed(1)} (${calc.bmiInfo.label})`,
+          `━━━━━━━━━━━━━━━━━━`,
+          `🎯 MỤC TIÊU: ${calc.goal.label} (${calc.goal.tag})`,
+          `🍽️ Calo mục tiêu: ${formatNumber(calc.targetKcal)} kcal/ngày`,
+          ``,
+          `🥗 PHÂN BỔ MACRO HÀNG NGÀY:`,
+          `• Đạm (Protein): ${calc.macros.proteinG}g (${calc.proteinPerKg.toFixed(1)}g/kg • ${calc.macros.proteinPct}%)`,
+          `• Chất béo (Fat): ${calc.macros.fatG}g (${calc.fatPercent}% • ${calc.macros.fatPerKg.toFixed(2)}g/kg)`,
+          `• Tinh bột (Carb): ${calc.macros.carbG}g (${calc.macros.carbPct}%)`,
+          ``,
+          `💧 NƯỚC UỐNG KHUYẾN NGHỊ:`,
+          `• ${calc.water.waterLiters.toFixed(2)} Lít/ngày (~${calc.water.waterBottles} chai 500ml)`,
+          `  (Bù thêm 300–500ml nếu tập nặng / ra nhiều mồ hôi)`,
+          `━━━━━━━━━━━━━━━━━━`,
+          ...(coachName ? [`💪 Phụ trách bởi: ${coachName}`] : [`💪 Chúc ${displayName} tập luyện bứt phá!`]),
+        ];
+
+        return lines.join('\n');
+      }
+
+      // ==========================================================
+      // 9. QUẢN LÝ LỊCH SỬ (LOCALSTORAGE)
+      // ==========================================================
+      function loadHistoryFromStorage() {
+        try {
+          const raw = localStorage.getItem(STORAGE_HISTORY_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              historyItems = parsed;
+            }
+          }
+        } catch (err) {
+          console.error('Lỗi đọc lịch sử:', err);
+          historyItems = [];
+        }
+        renderHistoryList();
+      }
+
+      function saveHistoryToStorage() {
+        try {
+          localStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(historyItems));
+        } catch (err) {
+          console.error('Lỗi lưu lịch sử:', err);
+          showToast('Không thể lưu vào bộ nhớ trình duyệt!');
+        }
+      }
+
+      function formatDateTimeVN(isoString) {
+        try {
+          return new Date(isoString).toLocaleString('vi-VN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          });
+        } catch {
+          return '';
+        }
+      }
+
+      function saveCurrentToHistory() {
+        if (!currentCalc) return;
+        const entry = {
+          id: 'rec_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          createdAt: new Date().toISOString(),
+          clientName: state.clientName.trim() || 'Học viên chưa đặt tên',
+          rawClientName: state.clientName.trim(),
+          stateSnapshot: { ...state },
+          calcSnapshot: JSON.parse(JSON.stringify(currentCalc)),
+        };
+
+        historyItems.unshift(entry);
+        if (historyItems.length > 100) {
+          historyItems = historyItems.slice(0, 100);
+        }
+
+        saveHistoryToStorage();
+        renderHistoryList();
+        showToast(`Đã lưu hồ sơ "${entry.clientName}"`);
+      }
+
+      function renderHistoryList() {
+        const count = historyItems.length;
+
+        if (count > 0) {
+          el.historyCountBadge.textContent = count > 99 ? '99+' : count;
+          el.historyCountBadge.classList.remove('hidden');
+          el.btnClearAllHistory.classList.remove('hidden');
+          el.historySearchWrap.classList.remove('hidden');
+        } else {
+          el.historyCountBadge.classList.add('hidden');
+          el.btnClearAllHistory.classList.add('hidden');
+          el.historySearchWrap.classList.add('hidden');
+        }
+
+        const keyword = (el.historySearchInput.value || '').trim().toLowerCase();
+        const filtered = keyword
+          ? historyItems.filter((item) => item.clientName.toLowerCase().includes(keyword))
+          : historyItems;
+
+        if (filtered.length === 0) {
+          el.historyList.innerHTML = '';
+          if (count === 0) {
+            el.historyEmptyState.classList.remove('hidden');
+          } else {
+            el.historyEmptyState.classList.add('hidden');
+            el.historyList.innerHTML = `
+              <div class="bg-charcoal border border-zinc-800 rounded-2xl p-6 text-center text-xs text-zinc-400">
+                Không tìm thấy học viên khớp với "<span class="text-gold-light font-semibold">${escapeHTML(keyword)}</span>".
+              </div>
+            `;
+          }
+          return;
+        }
+
+        el.historyEmptyState.classList.add('hidden');
+
+        el.historyList.innerHTML = filtered
+          .map((item) => {
+            const c = item.calcSnapshot;
+            const genderLabel = c.gender === 'male' ? 'Nam' : 'Nữ';
+            const bfInfo = c.bodyFat !== null ? ` • ${c.bodyFat}% mỡ` : '';
+            const waterLiters = c.water ? c.water.waterLiters.toFixed(2) : ((c.weight * 35) / 1000).toFixed(2);
+
+            return `
+              <article class="bg-charcoal border border-zinc-800/90 rounded-2xl p-4 space-y-3">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <h3 class="text-sm font-extrabold text-white truncate">${escapeHTML(item.clientName)}</h3>
+                    <p class="text-[11px] text-zinc-400 mt-0.5">
+                      ${genderLabel}, ${c.age} tuổi • ${c.height}cm • <strong class="text-zinc-200">${c.weight}kg</strong>${bfInfo}
+                    </p>
+                  </div>
+                  <span class="text-[10px] text-zinc-400 font-medium shrink-0 bg-obsidian px-2 py-1 rounded-lg border border-zinc-800">
+                    ${formatDateTimeVN(item.createdAt)}
+                  </span>
+                </div>
+
+                <!-- 3 Chỉ số nổi bật: TDEE, Calo mục tiêu, Nước -->
+                <div class="grid grid-cols-3 gap-2 bg-obsidian border border-zinc-800/80 rounded-xl p-2.5 text-center">
+                  <div>
+                    <span class="block text-[10px] text-zinc-500">TDEE</span>
+                    <span class="text-xs font-extrabold text-gold-light">${formatNumber(c.tdee)}</span>
+                  </div>
+                  <div class="border-x border-zinc-800">
+                    <span class="block text-[10px] text-zinc-500">Mục tiêu</span>
+                    <span class="text-xs font-extrabold text-white">${formatNumber(c.targetKcal)}</span>
+                  </div>
+                  <div>
+                    <span class="block text-[10px] text-sky-400">Nước/ngày</span>
+                    <span class="text-xs font-extrabold text-sky-300">${waterLiters} L</span>
+                  </div>
+                </div>
+
+                <!-- Tóm tắt mục tiêu & Macro -->
+                <div class="flex items-center justify-between text-[11px] px-0.5 flex-wrap gap-1">
+                  <span class="text-zinc-300 font-semibold">${escapeHTML(c.goal.label)} (${escapeHTML(c.goal.tag)})</span>
+                  <span class="font-bold">
+                    <span class="text-gold-light">P ${c.macros.proteinG}g</span> •
+                    <span class="text-rose-400">F ${c.macros.fatG}g</span> •
+                    <span class="text-sky-400">C ${c.macros.carbG}g</span>
+                  </span>
+                </div>
+
+                <!-- Nút hành động: Nạp lại / Sao chép / Xóa -->
+                <div class="grid grid-cols-3 gap-2 pt-1.5 border-t border-zinc-800/80">
+                  <button
+                    type="button"
+                    data-history-action="load"
+                    data-id="${item.id}"
+                    class="py-2 rounded-xl bg-obsidian hover:bg-surface border border-zinc-800 text-xs font-bold text-zinc-200 active:scale-95 transition-all"
+                  >
+                    Nạp lại
+                  </button>
+                  <button
+                    type="button"
+                    data-history-action="copy"
+                    data-id="${item.id}"
+                    class="py-2 rounded-xl bg-gold/15 hover:bg-gold/25 border border-gold/35 text-xs font-bold text-gold-light active:scale-95 transition-all"
+                  >
+                    Sao chép
+                  </button>
+                  <button
+                    type="button"
+                    data-history-action="delete"
+                    data-id="${item.id}"
+                    class="py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-xs font-bold text-rose-400 active:scale-95 transition-all"
+                  >
+                    Xóa
+                  </button>
+                </div>
+              </article>
+            `;
+          })
+          .join('');
+      }
+
+      // ==========================================================
+      // 10. CHUYỂN TAB & LÀM MỚI
+      // ==========================================================
+      function switchTab(tabName) {
+        const isCalc = tabName === 'calculator';
+
+        el.tabCalculator.classList.toggle('hidden', !isCalc);
+        el.tabHistory.classList.toggle('hidden', isCalc);
+
+        const activeNav = ['text-gold-light', 'bg-gold/15', 'border-gold/30'];
+        const inactiveNav = ['text-zinc-400', 'hover:text-zinc-200', 'border-transparent'];
+
+        if (isCalc) {
+          el.navTabCalc.classList.remove(...inactiveNav);
+          el.navTabCalc.classList.add(...activeNav);
+          el.navTabHistory.classList.remove(...activeNav);
+          el.navTabHistory.classList.add(...inactiveNav);
+        } else {
+          el.navTabHistory.classList.remove(...inactiveNav);
+          el.navTabHistory.classList.add(...activeNav);
+          el.navTabCalc.classList.remove(...activeNav);
+          el.navTabCalc.classList.add(...inactiveNav);
+          renderHistoryList();
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function resetFormOnly() {
+        // Chỉ reset thông số học viên, giữ nguyên hoàn toàn cài đặt thương hiệu phòng gym
+        state = { ...DEFAULT_STATE };
+        el.bodyFatContainer.classList.add('hidden');
+        el.iconBodyFatChevron.classList.remove('rotate-180');
+        syncInputsFromState();
+        switchTab('calculator');
+        showToast('Đã làm mới thông số học viên');
+      }
+
+      // ==========================================================
+      // 11. GẮN SỰ KIỆN TƯƠNG TÁC
+      // ==========================================================
+      function bindEvents() {
+        // Modal thương hiệu
+        el.btnOpenBrandModal.addEventListener('click', openBrandModal);
+        el.btnCloseBrandModal.addEventListener('click', closeBrandModal);
+        el.brandModal.addEventListener('click', (e) => {
+          if (e.target === el.brandModal) closeBrandModal();
+        });
+
+        el.brandForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          brand = {
+            gymName: el.inputBrandName.value.trim() || DEFAULT_BRAND.gymName,
+            subtitle: el.inputBrandSubtitle.value.trim() || DEFAULT_BRAND.subtitle,
+            coachName: el.inputBrandCoach.value.trim(),
+          };
+          saveBrandSettings();
+          applyBrandToUI();
+          closeBrandModal();
+          showToast('Đã cập nhật thương hiệu phòng gym!');
+        });
+
+        el.btnResetBrandDefault.addEventListener('click', () => {
+          brand = { ...DEFAULT_BRAND };
+          el.inputBrandName.value = brand.gymName;
+          el.inputBrandSubtitle.value = brand.subtitle;
+          el.inputBrandCoach.value = brand.coachName;
+          saveBrandSettings();
+          applyBrandToUI();
+          showToast('Đã khôi phục thương hiệu mặc định');
+        });
+
+        // Điều hướng Tab
+        el.navTabCalc.addEventListener('click', () => switchTab('calculator'));
+        el.navTabHistory.addEventListener('click', () => switchTab('history'));
+        el.btnGoToCalcFromEmpty.addEventListener('click', () => switchTab('calculator'));
+
+        // Tên học viên
+        el.clientName.addEventListener('input', (e) => {
+          state.clientName = e.target.value;
+        });
+
+        // Giới tính
+        [el.btnGenderMale, el.btnGenderFemale].forEach((btn) => {
+          btn.addEventListener('click', () => {
+            state.gender = btn.dataset.gender;
+            renderGenderButtons();
+            updateAllCalculations();
+          });
+        });
+
+        // Nhập số trực tiếp
+        el.inputAge.addEventListener('input', (e) => {
+          const val = parseFloat(e.target.value);
+          if (Number.isFinite(val)) {
+            state.age = val;
+            updateAllCalculations();
+          }
+        });
+
+        el.inputHeight.addEventListener('input', (e) => {
+          const val = parseFloat(e.target.value);
+          if (Number.isFinite(val)) {
+            state.height = val;
+            updateAllCalculations();
+          }
+        });
+
+        el.inputWeight.addEventListener('input', (e) => {
+          const val = parseFloat(e.target.value);
+          if (Number.isFinite(val)) {
+            state.weight = val;
+            updateAllCalculations();
+          }
+        });
+
+        el.inputBodyFat.addEventListener('input', (e) => {
+          state.bodyFat = e.target.value.trim();
+          updateAllCalculations();
+        });
+
+        // Chuẩn hóa giá trị khi rời khỏi ô nhập
+        [
+          { input: el.inputAge, key: 'age', min: 10, max: 100 },
+          { input: el.inputHeight, key: 'height', min: 100, max: 250 },
+          { input: el.inputWeight, key: 'weight', min: 25, max: 250 },
+        ].forEach(({ input, key, min, max }) => {
+          input.addEventListener('blur', () => {
+            let val = parseFloat(input.value);
+            if (!Number.isFinite(val)) val = DEFAULT_STATE[key];
+            val = Math.max(min, Math.min(max, val));
+            state[key] = val;
+            input.value = val;
+            updateAllCalculations();
+          });
+        });
+
+        // Nút tăng giảm (− / +)
+        document.querySelectorAll('.step-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const targetId = btn.dataset.stepTarget;
+            const step = parseFloat(btn.dataset.step);
+            const input = document.getElementById(targetId);
+            if (!input) return;
+
+            const min = parseFloat(input.min);
+            const max = parseFloat(input.max);
+            let current = parseFloat(input.value);
+
+            if (!Number.isFinite(current)) {
+              current = targetId === 'inputBodyFat' ? 20 : 0;
+            } else {
+              current = Number((current + step).toFixed(1));
+            }
+
+            if (Number.isFinite(min)) current = Math.max(min, current);
+            if (Number.isFinite(max)) current = Math.min(max, current);
+
+            input.value = current;
+
+            if (targetId === 'inputAge') state.age = current;
+            if (targetId === 'inputHeight') state.height = current;
+            if (targetId === 'inputWeight') state.weight = current;
+            if (targetId === 'inputBodyFat') state.bodyFat = String(current);
+
+            updateAllCalculations();
+          });
+        });
+
+        // Mở rộng / Thu gọn % Mỡ cơ thể
+        el.btnToggleBodyFat.addEventListener('click', () => {
+          const isHidden = el.bodyFatContainer.classList.toggle('hidden');
+          el.iconBodyFatChevron.classList.toggle('rotate-180', !isHidden);
+        });
+
+        el.btnClearBodyFat.addEventListener('click', () => {
+          state.bodyFat = '';
+          el.inputBodyFat.value = '';
+          updateAllCalculations();
+          showToast('Đã chuyển về công thức Mifflin-St Jeor');
+        });
+
+        // Chọn mức vận động
+        el.activityList.addEventListener('click', (e) => {
+          const btn = e.target.closest('.activity-item');
+          if (!btn) return;
+          state.activity = parseFloat(btn.dataset.activity);
+          renderActivityList();
+          updateAllCalculations();
+        });
+
+        // Chọn mục tiêu Calo
+        el.goalList.addEventListener('click', (e) => {
+          const btn = e.target.closest('.goal-item');
+          if (!btn) return;
+          state.goalId = btn.dataset.goal;
+          updateAllCalculations();
+        });
+
+        // Thanh trượt Đạm (1.4 - 2.6 g/kg)
+        el.proteinSlider.addEventListener('input', (e) => {
+          state.proteinPerKg = parseFloat(e.target.value);
+          updateAllCalculations();
+        });
+
+        // Thanh trượt % Chất béo (15% - 40%)
+        el.fatSlider.addEventListener('input', (e) => {
+          state.fatPercent = parseInt(e.target.value, 10);
+          updateAllCalculations();
+        });
+
+        // 3 nút chọn nhanh % Chất béo (20% / 25% / 30%)
+        document.querySelectorAll('.fat-preset-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const preset = parseInt(btn.dataset.fatPreset, 10);
+            state.fatPercent = preset;
+            el.fatSlider.value = preset;
+            updateAllCalculations();
+          });
+        });
+
+        // Bộ nút PT
+        el.btnCopyReport.addEventListener('click', () => {
+          if (!currentCalc) return;
+          const reportText = buildClientReport(currentCalc, state.clientName);
+          const ok = copyTextToClipboard(reportText);
+          showToast(ok ? 'Đã sao chép! Sẵn sàng dán vào Zalo/Messenger' : 'Không thể sao chép tự động');
+        });
+
+        el.btnSaveHistory.addEventListener('click', saveCurrentToHistory);
+        el.btnResetForm.addEventListener('click', resetFormOnly);
+
+        // Tìm kiếm lịch sử
+        el.historySearchInput.addEventListener('input', renderHistoryList);
+
+        // Nạp lại / Sao chép / Xóa từng hồ sơ lịch sử
+        el.historyList.addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-history-action]');
+          if (!btn) return;
+
+          const action = btn.dataset.historyAction;
+          const id = btn.dataset.id;
+          const item = historyItems.find((h) => h.id === id);
+          if (!item) return;
+
+          if (action === 'load') {
+            state = { ...DEFAULT_STATE, ...item.stateSnapshot };
+            syncInputsFromState();
+            switchTab('calculator');
+            showToast(`Đã nạp lại hồ sơ "${item.clientName}"`);
+          } else if (action === 'copy') {
+            // Tính lại nhanh từ snapshot để luôn đầy đủ trường dữ liệu (kể cả nước & thương hiệu mới nhất)
+            const calcData = item.calcSnapshot.water
+              ? item.calcSnapshot
+              : calculateMetrics({ ...DEFAULT_STATE, ...item.stateSnapshot });
+            const reportText = buildClientReport(calcData, item.rawClientName || item.clientName);
+            const ok = copyTextToClipboard(reportText);
+            showToast(ok ? 'Đã sao chép báo cáo học viên!' : 'Không thể sao chép');
+          } else if (action === 'delete') {
+            historyItems = historyItems.filter((h) => h.id !== id);
+            saveHistoryToStorage();
+            renderHistoryList();
+            showToast('Đã xóa hồ sơ khỏi lịch sử');
+          }
+        });
+
+        // Modal xác nhận xóa tất cả lịch sử
+        el.btnClearAllHistory.addEventListener('click', () => {
+          el.confirmModal.classList.remove('hidden');
+        });
+
+        el.btnCancelClearAll.addEventListener('click', () => {
+          el.confirmModal.classList.add('hidden');
+        });
+
+        el.confirmModal.addEventListener('click', (e) => {
+          if (e.target === el.confirmModal) el.confirmModal.classList.add('hidden');
+        });
+
+        el.btnConfirmClearAll.addEventListener('click', () => {
+          historyItems = [];
+          saveHistoryToStorage();
+          renderHistoryList();
+          el.confirmModal.classList.add('hidden');
+          showToast('Đã xóa toàn bộ lịch sử');
+        });
+      }
+
+      // ==========================================================
+      // 12. KHỞI CHẠY ỨNG DỤNG
+      // ==========================================================
+      function init() {
+        loadBrandSettings();
+        bindEvents();
+        syncInputsFromState();
+        loadHistoryFromStorage();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
