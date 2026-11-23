@@ -1646,6 +1646,69 @@
       border-color: var(--emerald);
       color: #052E1C;
     }
+    .issue-status-btns {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .issue-picker-row.state-improved {
+      background: rgba(245, 158, 11, 0.12);
+      border-color: var(--amber);
+    }
+    .issue-improved-pill.active {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: #1F1300;
+    }
+
+    /* Thanh tiến độ số buổi tập */
+    .session-progress-box {
+      margin-top: 10px;
+      padding: 9px 11px;
+      border-radius: 11px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+    }
+    .session-progress-bar {
+      width: 100%;
+      height: 7px;
+      border-radius: 99px;
+      background: #272730;
+      overflow: hidden;
+      margin-top: 7px;
+    }
+    .session-progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+      transition: width 0.25s ease;
+    }
+
+    /* Bảng tổng hợp thay đổi 7 chỉ số đo */
+    .measure-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .measure-stat-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 11px;
+    }
+    .measure-stat-card.is-wide {
+      grid-column: 1 / -1;
+      border-color: var(--gold-border);
+      background: rgba(212, 175, 55, 0.08);
+    }
+    .measure-log-item {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 12px;
+    }
+
 
     /* Chip lọc vấn đề thể trạng trong tab Show Khách */
     .issue-filter-chips {
@@ -3001,6 +3064,17 @@
             <input id="scDuration" type="text" class="text-input" maxlength="40" placeholder="VD: 12 tuần • 36 buổi" />
           </div>
         </div>
+        <div class="grid-2">
+          <div>
+            <label for="scSessionsTotal" class="field-label">Số buổi đăng ký</label>
+            <input id="scSessionsTotal" type="number" inputmode="numeric" min="0" max="500" class="text-input" placeholder="VD: 24" />
+          </div>
+          <div>
+            <label for="scSessionsDone" class="field-label">Số buổi đã tập</label>
+            <input id="scSessionsDone" type="number" inputmode="numeric" min="0" max="500" class="text-input" placeholder="VD: 12" />
+          </div>
+        </div>
+
 
         <div>
           <label for="scPackage" class="field-label">Gói tập đang / đã tập</label>
@@ -3025,7 +3099,7 @@
         <!-- Gắn thẻ vấn đề thể trạng khách từng gặp & đã hết (đồng bộ bộ 12 mục khảo sát) -->
         <div class="slider-box stack-xs">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span style="font-size:12px;font-weight:800;color:var(--gold-light);">🩺 Vấn đề thể trạng từng gặp &amp; đã hết</span>
+            <span style="font-size:12px;font-weight:800;color:var(--gold-light);">🩺 Vấn đề thể trạng (Giảm bớt / Đã hết)</span>
             <span id="scIssuesCountText" class="badge badge-neutral" style="font-size:10px;padding:2px 8px;">0 vấn đề</span>
           </div>
           <div style="font-size:11px;color:var(--text-muted);line-height:1.4;">
@@ -3125,6 +3199,86 @@
           <button type="submit" class="btn btn-gold">Lưu gói tập</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL THEO DÕI & SHOW THAY ĐỔI SỐ ĐO (7 CHỈ SỐ) ==================== -->
+  <div id="measurementsModal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div>
+          <h3 id="measureModalTitle" class="modal-title">Tiến trình thay đổi số đo</h3>
+          <div id="measureClientSub" style="font-size:11.5px;color:var(--text-secondary);margin-top:2px;"></div>
+        </div>
+        <button type="button" class="icon-btn" style="width:36px;height:36px;flex-shrink:0;" data-close-modal="measurementsModal" aria-label="Đóng">✕</button>
+      </div>
+
+      <div class="stack-md">
+        <!-- 1. Bảng so sánh tự động Buổi đầu -> Hiện tại (Luôn hiện kể cả khi Show Khách) -->
+        <div class="stack-xs">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <span style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold-light);">📊 Thay đổi từ Buổi đầu → Hiện tại</span>
+            <span id="measureRangeBadge" class="badge badge-gold" style="font-size:10px;padding:2px 8px;">0 lần đo</span>
+          </div>
+          <div id="measureSummaryWrap"></div>
+        </div>
+
+        <!-- 2. Khung nhập đợt đo mới (Tự động ẩn khi bật Chế độ Show Khách) -->
+        <form id="measureForm" class="slider-box stack-xs admin-only" style="border-color:var(--gold-border);">
+          <div style="font-size:12px;font-weight:800;color:var(--gold-light);">➕ Nhập đợt đo mới cho học viên</div>
+          <div style="font-size:11px;color:var(--text-muted);">Không bắt buộc điền đủ cả 7 ô, chỉ cần nhập những chỉ số vừa đo.</div>
+
+          <div class="grid-2">
+            <div>
+              <label for="mDate" class="field-label">Ngày đo</label>
+              <input id="mDate" type="date" class="text-input" style="padding:9px 10px;font-size:13px;" required />
+            </div>
+            <div>
+              <label for="mLabel" class="field-label">Mốc đo (tùy chọn)</label>
+              <input id="mLabel" type="text" class="text-input" maxlength="35" style="padding:9px 10px;font-size:13px;" placeholder="VD: Buổi đầu, Tuần 4..." />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <label for="mWeight" class="field-label">Cân nặng (kg)</label>
+              <input id="mWeight" type="number" inputmode="decimal" step="0.1" min="20" max="250" class="text-input" style="padding:9px 10px;font-size:13px;" placeholder="VD: 68.5" />
+            </div>
+            <div>
+              <label for="mChest" class="field-label">Ngực (cm)</label>
+              <input id="mChest" type="number" inputmode="decimal" step="0.1" min="30" max="200" class="text-input" style="padding:9px 10px;font-size:13px;" placeholder="VD: 92" />
+            </div>
+            <div>
+              <label for="mWaist" class="field-label">Eo (cm)</label>
+              <input id="mWaist" type="number" inputmode="decimal" step="0.1" min="30" max="200" class="text-input" style="padding:9px 10px;font-size:13px;" placeholder="VD: 76" />
+            </div>
+            <div>
+              <label for="mHip" class="field-label">Hông (cm)</label>
+              <input id="mHip" type="number" inputmode="decimal" step="0.1" min="30" max="200" class="text-input" style="padding:9px 10px;font-size:13px;" placeholder="VD: 88" />
+            </div>
+            <div>
+              <label for="mGlute" class="field-label">Mông (cm)</label>
+              <input id="mGlute" type="number" inputmode="decimal" step="0.1" min="30" max="200" class="text-input" style="padding:9px 10px;font-size:13px;" placeholder="VD: 96" />
+            </div>
+            <div>
+              <label for="mThigh" class="field-label">Đùi (cm)</label>
+              <input id="mThigh" type="number" inputmode="decimal" step="0.1" min="20" max="120" class="text-input" style="padding:9px 10px;font-size:13px;" placeholder="VD: 55" />
+            </div>
+            <div style="grid-column:1 / -1;">
+              <label for="mArm" class="field-label">Bắp tay (cm)</label>
+              <input id="mArm" type="number" inputmode="decimal" step="0.1" min="15" max="80" class="text-input" style="padding:9px 10px;font-size:13px;" placeholder="VD: 31.5" />
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-gold btn-sm btn-full" style="margin-top:4px;">💾 Lưu đợt đo này</button>
+        </form>
+
+        <!-- 3. Nhật ký các lần đo theo thời gian -->
+        <div class="stack-xs">
+          <div style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);">📅 Chi tiết từng lần đo</div>
+          <div id="measureHistoryList" class="stack-xs"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3623,7 +3777,20 @@
     let tempPhotoBefore = '';
     let tempPhotoAfter = '';
     let tempIssuesHad = [];
+    let tempIssuesImproved = [];
     let tempIssuesResolved = [];
+    let activeMeasureClientId = '';
+
+    const BODY_METRICS = [
+      { key: 'weight', label: 'Cân nặng', unit: 'kg' },
+      { key: 'chest', label: 'Ngực', unit: 'cm' },
+      { key: 'waist', label: 'Eo', unit: 'cm' },
+      { key: 'hip', label: 'Hông', unit: 'cm' },
+      { key: 'glute', label: 'Mông', unit: 'cm' },
+      { key: 'thigh', label: 'Đùi', unit: 'cm' },
+      { key: 'arm', label: 'Bắp tay', unit: 'cm' },
+    ];
+
     let tempLogoUrl = '';
     let tempPtPhotoUrl = '';
     let tempGymUploadUrl = '';
@@ -4052,6 +4219,9 @@
           list.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
           showcaseClients = list;
           renderShowcaseClients();
+          if (activeMeasureClientId && !document.getElementById('measurementsModal').classList.contains('hidden')) {
+            renderMeasurementsModal();
+          }
           updateSyncStatusUI('online');
         },
         (err) => console.error('Lỗi đồng bộ showcase_clients:', err)
@@ -4771,12 +4941,16 @@
        10. LOGIC PHẦN KHẢO SÁT THỂ TRẠNG, CẨM NANG & GỢI Ý CA TƯƠNG ĐỒNG
     ============================================================== */
     function getClientIssues(cli) {
-      const resolved = Array.isArray(cli && cli.issuesResolved) ? cli.issuesResolved : [];
+      const resolved = Array.isArray(cli && cli.issuesResolved) ? Array.from(new Set(cli.issuesResolved)) : [];
+      const improved = Array.isArray(cli && cli.issuesImproved)
+        ? Array.from(new Set(cli.issuesImproved.filter((id) => !resolved.includes(id))))
+        : [];
       const rawHad = Array.isArray(cli && cli.issuesHad) ? cli.issuesHad : [];
-      const hadSet = new Set([...rawHad, ...resolved]);
+      const hadSet = new Set([...rawHad, ...improved, ...resolved]);
       return {
         had: Array.from(hadSet),
-        resolved: Array.from(new Set(resolved)),
+        improved,
+        resolved,
       };
     }
 
@@ -4784,15 +4958,17 @@
       if (!Array.isArray(issueIds) || issueIds.length === 0) return [];
       return showcaseClients
         .map((cli) => {
-          const { had, resolved } = getClientIssues(cli);
+          const { had, improved, resolved } = getClientIssues(cli);
           const matchedResolved = issueIds.filter((id) => resolved.includes(id));
+          const matchedImproved = issueIds.filter((id) => improved.includes(id));
           const matchedHad = issueIds.filter((id) => had.includes(id));
-          const hits = onlyResolved ? matchedResolved : matchedHad;
+          const hits = onlyResolved ? [...matchedResolved, ...matchedImproved] : matchedHad;
           return {
             cli,
             matchedHad,
+            matchedImproved,
             matchedResolved,
-            score: matchedResolved.length * 3 + matchedHad.length,
+            score: matchedResolved.length * 4 + matchedImproved.length * 2 + matchedHad.length,
             matches: hits.length > 0,
           };
         })
@@ -5029,18 +5205,16 @@
 
       resolvedBtn.classList.toggle('active', showcaseResolvedOnly);
 
-      // Đếm số học viên cho từng vấn đề thể trạng
       const countsByIssue = {};
       SCREENING_ITEMS.forEach((it) => { countsByIssue[it.id] = 0; });
       showcaseClients.forEach((cli) => {
-        const { had, resolved } = getClientIssues(cli);
-        const list = showcaseResolvedOnly ? resolved : had;
+        const { had, improved, resolved } = getClientIssues(cli);
+        const list = showcaseResolvedOnly ? [...resolved, ...improved] : had;
         list.forEach((id) => {
           if (countsByIssue[id] !== undefined) countsByIssue[id] += 1;
         });
       });
 
-      // Ưu tiên hiện các vấn đề có học viên hoặc đang được chọn lọc
       const visibleItems = SCREENING_ITEMS.filter(
         (it) => countsByIssue[it.id] > 0 || showcaseIssueFilter.includes(it.id)
       );
@@ -5065,7 +5239,6 @@
         showcaseIssueFilter.length > 0 || showcaseResolvedOnly || Boolean(showcaseSearchQuery.trim());
       clearBtn.classList.toggle('hidden', !hasAnyFilter);
 
-      // Banner khớp nhanh với vấn đề khách đang khảo sát ở Tab Tư vấn
       const currentIds = screenState.selectedIds || [];
       if (currentIds.length > 0) {
         const matches = getMatchingShowcaseClients(currentIds, false);
@@ -5096,6 +5269,162 @@
       }
     }
 
+    function sortClientMeasurements(list) {
+      if (!Array.isArray(list)) return [];
+      return [...list].sort((a, b) => {
+        const da = String(a.date || '').localeCompare(String(b.date || ''));
+        if (da !== 0) return da;
+        return String(a.createdAt || '').localeCompare(String(b.createdAt || ''));
+      });
+    }
+
+    function formatMeasureDateVN(dateStr) {
+      if (!dateStr) return '';
+      const parts = String(dateStr).split('-');
+      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      return dateStr;
+    }
+
+    function openMeasurementsModal(clientId) {
+      const cli = showcaseClients.find((c) => c.id === clientId);
+      if (!cli) return;
+      activeMeasureClientId = clientId;
+      document.getElementById('mDate').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('mLabel').value = '';
+      ['mWeight', 'mChest', 'mWaist', 'mHip', 'mGlute', 'mThigh', 'mArm'].forEach((id) => {
+        document.getElementById(id).value = '';
+      });
+      renderMeasurementsModal();
+      document.getElementById('measurementsModal').classList.remove('hidden');
+    }
+
+    function renderMeasurementsModal() {
+      const cli = showcaseClients.find((c) => c.id === activeMeasureClientId);
+      if (!cli) return;
+
+      document.getElementById('measureModalTitle').textContent = cli.name || 'Số đo học viên';
+      const totalS = Number(cli.sessionsTotal) || 0;
+      const doneS = Number(cli.sessionsDone) || 0;
+      const sessionInfo =
+        totalS > 0
+          ? `Đã tập ${doneS}/${totalS} buổi (Còn ${Math.max(0, totalS - doneS)} buổi)`
+          : doneS > 0
+          ? `Đã tập ${doneS} buổi`
+          : cli.duration || 'Hồ sơ theo dõi số đo';
+      document.getElementById('measureClientSub').textContent = sessionInfo;
+
+      const sorted = sortClientMeasurements(cli.measurements);
+      const count = sorted.length;
+      document.getElementById('measureRangeBadge').textContent =
+        count >= 2
+          ? `${formatMeasureDateVN(sorted[0].date)} → ${formatMeasureDateVN(sorted[count - 1].date)}`
+          : `${count} lần đo`;
+
+      const summaryWrap = document.getElementById('measureSummaryWrap');
+      if (count === 0) {
+        summaryWrap.innerHTML = `
+          <div class="empty-card" style="padding:16px 12px;">
+            <div style="font-size:12.5px;font-weight:700;color:var(--gold-light);margin-bottom:3px;">Chưa có dữ liệu số đo</div>
+            <div style="font-size:11.5px;color:var(--text-secondary);">PT hãy nhập đợt đo đầu tiên ở bên dưới để hệ thống tự tính mức thay đổi qua từng giai đoạn.</div>
+          </div>
+        `;
+      } else {
+        summaryWrap.innerHTML = `
+          <div class="measure-summary-grid">
+            ${BODY_METRICS.map((m) => {
+              const validEntries = sorted.filter(
+                (en) => en[m.key] !== null && en[m.key] !== undefined && en[m.key] !== '' && Number.isFinite(Number(en[m.key]))
+              );
+              const isWide = m.key === 'weight' ? 'is-wide' : '';
+
+              if (validEntries.length === 0) {
+                return `
+                  <div class="measure-stat-card ${isWide}">
+                    <div style="font-size:11px;font-weight:700;color:var(--text-muted);">${m.label}</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Chưa đo</div>
+                  </div>
+                `;
+              }
+
+              const firstVal = Number(validEntries[0][m.key]);
+              const lastVal = Number(validEntries[validEntries.length - 1][m.key]);
+
+              if (validEntries.length === 1) {
+                return `
+                  <div class="measure-stat-card ${isWide}">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                      <span style="font-size:11px;font-weight:700;color:var(--text-secondary);">${m.label}</span>
+                      <span class="badge badge-neutral" style="font-size:10px;padding:1px 6px;">Buổi đầu</span>
+                    </div>
+                    <div style="font-size:16px;font-weight:800;color:var(--text-primary);margin-top:4px;">${firstVal} <small style="font-size:11px;color:var(--text-muted);">${m.unit}</small></div>
+                  </div>
+                `;
+              }
+
+              const diff = Math.round((lastVal - firstVal) * 10) / 10;
+              const sign = diff > 0 ? '+' : '';
+              const badgeCls = diff < 0 ? 'badge-emerald' : diff > 0 ? 'badge-gold' : 'badge-neutral';
+              return `
+                <div class="measure-stat-card ${isWide}">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:4px;">
+                    <span style="font-size:11px;font-weight:700;color:var(--text-secondary);">${m.label}</span>
+                    <span class="badge ${badgeCls}" style="font-size:10.5px;padding:2px 7px;">${sign}${diff} ${m.unit}</span>
+                  </div>
+                  <div style="font-size:14.5px;font-weight:800;color:var(--text-primary);margin-top:5px;">
+                    <span style="color:var(--text-muted);font-weight:600;font-size:12.5px;">${firstVal}</span>
+                    <span style="color:var(--gold-light);margin:0 4px;">→</span>
+                    <span>${lastVal}</span>
+                    <small style="font-size:11px;color:var(--text-secondary);margin-left:2px;">${m.unit}</small>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      const historyWrap = document.getElementById('measureHistoryList');
+      if (count === 0) {
+        historyWrap.innerHTML = `<div style="font-size:11.5px;color:var(--text-muted);text-align:center;padding:8px;">Chưa có lịch sử đo nào.</div>`;
+        return;
+      }
+
+      const newestFirst = [...sorted].reverse();
+      const firstId = sorted[0].id;
+      const latestId = sorted[sorted.length - 1].id;
+
+      historyWrap.innerHTML = newestFirst
+        .map((en) => {
+          const tags = BODY_METRICS.filter(
+            (m) => en[m.key] !== null && en[m.key] !== undefined && en[m.key] !== '' && Number.isFinite(Number(en[m.key]))
+          )
+            .map((m) => `<span class="badge badge-neutral" style="font-size:10.5px;padding:3px 8px;">${m.label}: <strong style="color:var(--text-primary);margin-left:2px;">${en[m.key]}${m.unit}</strong></span>`)
+            .join('');
+
+          const stageTag =
+            count > 1 && en.id === latestId
+              ? '<span class="badge badge-gold" style="font-size:10px;padding:2px 7px;">Hiện tại</span>'
+              : en.id === firstId
+              ? '<span class="badge badge-sky" style="font-size:10px;padding:2px 7px;">Buổi đầu</span>'
+              : '';
+
+          return `
+            <div class="measure-log-item stack-xs">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <strong style="font-size:12.5px;color:var(--text-primary);">${formatMeasureDateVN(en.date)}</strong>
+                  ${en.label ? `<span style="font-size:11.5px;color:var(--gold-light);font-weight:700;">• ${escapeHTML(en.label)}</span>` : ''}
+                  ${stageTag}
+                </div>
+                <button type="button" class="btn btn-danger btn-sm admin-only" style="min-height:28px;padding:2px 8px;font-size:10.5px;" data-del-measure="${escapeHTML(en.id)}">Xóa</button>
+              </div>
+              <div class="tag-wrap">${tags}</div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
     function renderShowcaseClients() {
       const total = showcaseClients.length;
       const activeCount = showcaseClients.filter((c) => c.status === 'active').length;
@@ -5112,11 +5441,12 @@
         .filter((c) => {
           if (showcaseFilter !== 'all' && c.status !== showcaseFilter) return false;
 
-          const { had, resolved } = getClientIssues(c);
-          if (showcaseResolvedOnly && resolved.length === 0) return false;
+          const { had, improved, resolved } = getClientIssues(c);
+          const betterPool = [...resolved, ...improved];
+          if (showcaseResolvedOnly && betterPool.length === 0) return false;
 
           if (showcaseIssueFilter.length > 0) {
-            const targetPool = showcaseResolvedOnly ? resolved : had;
+            const targetPool = showcaseResolvedOnly ? betterPool : had;
             const hit = showcaseIssueFilter.some((id) => targetPool.includes(id));
             if (!hit) return false;
           }
@@ -5137,15 +5467,16 @@
           return true;
         })
         .sort((a, b) => {
-          // Khi đang lọc theo vấn đề, ưu tiên đưa các ca đã hết & khớp nhiều vấn đề lên trên cùng
           if (showcaseIssueFilter.length > 0) {
             const ia = getClientIssues(a);
             const ib = getClientIssues(b);
             const scoreA =
-              showcaseIssueFilter.filter((id) => ia.resolved.includes(id)).length * 3 +
+              showcaseIssueFilter.filter((id) => ia.resolved.includes(id)).length * 4 +
+              showcaseIssueFilter.filter((id) => ia.improved.includes(id)).length * 2 +
               showcaseIssueFilter.filter((id) => ia.had.includes(id)).length;
             const scoreB =
-              showcaseIssueFilter.filter((id) => ib.resolved.includes(id)).length * 3 +
+              showcaseIssueFilter.filter((id) => ib.resolved.includes(id)).length * 4 +
+              showcaseIssueFilter.filter((id) => ib.improved.includes(id)).length * 2 +
               showcaseIssueFilter.filter((id) => ib.had.includes(id)).length;
             if (scoreB !== scoreA) return scoreB - scoreA;
           }
@@ -5178,18 +5509,43 @@
             ? '<span class="badge badge-neutral admin-only" style="font-size:10px;padding:2px 7px;">Mẫu</span>'
             : '';
 
-          const { had, resolved } = getClientIssues(cli);
+          // Thanh theo dõi số buổi đăng ký / đã tập
+          const sTotal = Number(cli.sessionsTotal) || 0;
+          const sDone = Number(cli.sessionsDone) || 0;
+          let sessionHtml = '';
+          if (sTotal > 0 || sDone > 0) {
+            const pct = sTotal > 0 ? Math.min(100, Math.round((sDone / sTotal) * 100)) : 100;
+            const remain = sTotal > 0 ? Math.max(0, sTotal - sDone) : 0;
+            sessionHtml = `
+              <div class="session-progress-box">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <div style="font-size:12px;font-weight:700;color:var(--text-primary);">
+                    🗓️ Đã tập: <strong style="color:var(--gold-light);">${sDone}</strong>${sTotal > 0 ? ` / ${sTotal} buổi` : ' buổi'}
+                    ${sTotal > 0 ? `<span style="font-size:11px;color:var(--text-secondary);font-weight:600;margin-left:4px;">(Còn ${remain})</span>` : ''}
+                  </div>
+                  <button type="button" class="btn btn-outline-gold btn-sm admin-only" style="min-height:28px;padding:2px 9px;font-size:11px;" data-inc-session="${cli.id}">+1 buổi</button>
+                </div>
+                ${sTotal > 0 ? `<div class="session-progress-bar"><div class="session-progress-fill" style="width:${pct}%;"></div></div>` : ''}
+              </div>
+            `;
+          }
+
+          // Vấn đề thể trạng 3 trạng thái: Đã hết / Giảm bớt / Từng gặp
+          const { had, improved, resolved } = getClientIssues(cli);
           const resolvedItems = SCREENING_ITEMS.filter((it) => resolved.includes(it.id));
-          const improvingItems = SCREENING_ITEMS.filter((it) => had.includes(it.id) && !resolved.includes(it.id));
+          const improvedItems = SCREENING_ITEMS.filter((it) => improved.includes(it.id));
+          const trackingItems = SCREENING_ITEMS.filter(
+            (it) => had.includes(it.id) && !resolved.includes(it.id) && !improved.includes(it.id)
+          );
 
           let issuesBadgesHtml = '';
-          if (resolvedItems.length > 0 || improvingItems.length > 0) {
+          if (resolvedItems.length > 0 || improvedItems.length > 0 || trackingItems.length > 0) {
             issuesBadgesHtml = `
               <div style="margin-top:10px;padding:9px 10px;border-radius:11px;background:var(--bg-input);border:1px solid var(--border-soft);" class="stack-xs">
                 ${
                   resolvedItems.length > 0
                     ? `<div>
-                        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#34D399;margin-bottom:5px;">✓ Đã hết / Cải thiện rõ rệt</div>
+                        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#34D399;margin-bottom:5px;">✓ Đã hết</div>
                         <div class="tag-wrap">
                           ${resolvedItems
                             .map((it) => `<span class="badge badge-emerald" style="font-size:10.5px;padding:3px 8px;">✓ ${escapeHTML(it.title)}</span>`)
@@ -5199,11 +5555,23 @@
                     : ''
                 }
                 ${
-                  improvingItems.length > 0
+                  improvedItems.length > 0
                     ? `<div>
-                        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--gold-light);margin-bottom:5px;">• Từng gặp / Đang cải thiện</div>
+                        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#FBBF24;margin-bottom:5px;">↘ Giảm bớt</div>
                         <div class="tag-wrap">
-                          ${improvingItems
+                          ${improvedItems
+                            .map((it) => `<span class="badge badge-amber" style="font-size:10.5px;padding:3px 8px;">↘ ${escapeHTML(it.title)}</span>`)
+                            .join('')}
+                        </div>
+                      </div>`
+                    : ''
+                }
+                ${
+                  trackingItems.length > 0
+                    ? `<div>
+                        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--gold-light);margin-bottom:5px;">• Từng gặp / Đang theo dõi</div>
+                        <div class="tag-wrap">
+                          ${trackingItems
                             .map((it) => {
                               const cls = it.category === 'internal' ? 'badge-rose' : it.category === 'lower' ? 'badge-sky' : 'badge-gold';
                               return `<span class="badge ${cls}" style="font-size:10.5px;padding:3px 8px;">${escapeHTML(it.title)}</span>`;
@@ -5230,6 +5598,8 @@
             `;
           }
 
+          const mCount = Array.isArray(cli.measurements) ? cli.measurements.length : 0;
+
           return `
             <article class="card">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
@@ -5243,6 +5613,7 @@
                 ${statusBadge}
               </div>
 
+              ${sessionHtml}
               ${issuesBadgesHtml}
               ${photoHtml}
 
@@ -5255,6 +5626,11 @@
                 <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.4px;color:var(--gold-light);">Sự thay đổi nổi bật</div>
                 <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-top:3px;">${escapeHTML(cli.transformation)}</div>
               </div>
+
+              <!-- Nút xem & nhập thay đổi 7 chỉ số đo (Luôn hiện kể cả ở Chế độ Show Khách) -->
+              <button type="button" class="btn btn-outline-gold btn-sm btn-full" style="margin-top:10px;" data-open-measure="${cli.id}">
+                📏 Xem thay đổi số đo (Kg &amp; 6 vòng) ${mCount > 0 ? `• ${mCount} lần đo` : ''}
+              </button>
 
               ${cli.packageName ? `<div style="margin-top:10px;"><span class="badge badge-neutral">🏋️ ${escapeHTML(cli.packageName)}</span></div>` : ''}
               ${cli.quote ? `<div class="client-quote">${escapeHTML(cli.quote)}</div>` : ''}
@@ -5521,8 +5897,9 @@
       if (!wrap) return;
 
       const hadCount = tempIssuesHad.length;
+      const impCount = tempIssuesImproved.length;
       const resCount = tempIssuesResolved.length;
-      countEl.textContent = `${hadCount} từng gặp • ${resCount} đã hết`;
+      countEl.textContent = `${hadCount} gặp • ${impCount} giảm • ${resCount} hết`;
 
       const groups = [
         { key: 'upper', label: 'Phần Upper (Cổ • Vai • Lưng)' },
@@ -5538,19 +5915,27 @@
             ${items
               .map((it) => {
                 const isHad = tempIssuesHad.includes(it.id);
+                const isImp = tempIssuesImproved.includes(it.id);
                 const isRes = tempIssuesResolved.includes(it.id);
-                const rowState = isRes ? 'state-resolved' : isHad ? 'state-had' : '';
+                const rowState = isRes ? 'state-resolved' : isImp ? 'state-improved' : isHad ? 'state-had' : '';
+                const boxColor = isRes ? 'var(--emerald)' : isImp ? 'var(--amber)' : isHad ? 'var(--gold)' : '#52525B';
+                const boxBg = isRes ? 'var(--emerald)' : isImp ? 'var(--amber)' : isHad ? 'var(--gold)' : 'transparent';
                 return `
                   <div class="issue-picker-row ${rowState}">
                     <button type="button" class="issue-toggle-main" data-pick-had="${it.id}">
-                      <span style="width:18px;height:18px;border-radius:5px;border:1.6px solid ${isRes ? 'var(--emerald)' : isHad ? 'var(--gold)' : '#52525B'};background:${isRes ? 'var(--emerald)' : isHad ? 'var(--gold)' : 'transparent'};color:#0A0A0C;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;">
-                        ${isHad || isRes ? '✓' : ''}
+                      <span style="width:18px;height:18px;border-radius:5px;border:1.6px solid ${boxColor};background:${boxBg};color:#0A0A0C;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;">
+                        ${isHad || isImp || isRes ? '✓' : ''}
                       </span>
                       <span>${escapeHTML(it.title)}</span>
                     </button>
-                    <button type="button" class="issue-resolved-pill ${isRes ? 'active' : ''}" data-pick-resolved="${it.id}">
-                      ${isRes ? '✓ Đã hết' : 'Đánh dấu hết'}
-                    </button>
+                    <div class="issue-status-btns">
+                      <button type="button" class="issue-resolved-pill issue-improved-pill ${isImp ? 'active' : ''}" data-pick-improved="${it.id}">
+                        Giảm bớt
+                      </button>
+                      <button type="button" class="issue-resolved-pill ${isRes ? 'active' : ''}" data-pick-resolved="${it.id}">
+                        Đã hết
+                      </button>
+                    </div>
                   </div>
                 `;
               })
@@ -5575,6 +5960,14 @@
         ? prefillData.status
         : 'active';
       document.getElementById('scDuration').value = isEdit ? clientObj.duration || '' : '';
+      document.getElementById('scSessionsTotal').value =
+        isEdit && clientObj.sessionsTotal ? clientObj.sessionsTotal : '';
+      document.getElementById('scSessionsDone').value =
+        isEdit && (clientObj.sessionsDone || clientObj.sessionsDone === 0) && clientObj.sessionsTotal
+          ? clientObj.sessionsDone
+          : isEdit && clientObj.sessionsDone
+          ? clientObj.sessionsDone
+          : '';
       document.getElementById('scPackage').value = isEdit ? clientObj.packageName || '' : '';
       document.getElementById('scBeforeState').value = isEdit
         ? clientObj.beforeState || ''
@@ -5585,14 +5978,17 @@
       document.getElementById('scQuote').value = isEdit ? clientObj.quote || '' : '';
 
       if (isEdit) {
-        const { had, resolved } = getClientIssues(clientObj);
+        const { had, improved, resolved } = getClientIssues(clientObj);
         tempIssuesHad = [...had];
+        tempIssuesImproved = [...improved];
         tempIssuesResolved = [...resolved];
       } else if (prefillData) {
         tempIssuesHad = Array.isArray(prefillData.issuesHad) ? [...prefillData.issuesHad] : [];
+        tempIssuesImproved = Array.isArray(prefillData.issuesImproved) ? [...prefillData.issuesImproved] : [];
         tempIssuesResolved = Array.isArray(prefillData.issuesResolved) ? [...prefillData.issuesResolved] : [];
       } else {
         tempIssuesHad = [];
+        tempIssuesImproved = [];
         tempIssuesResolved = [];
       }
 
@@ -5770,7 +6166,7 @@
           document.getElementById(btn.dataset.closeModal).classList.add('hidden');
         });
       });
-      ['settingsModal', 'clientModal', 'packageModal', 'gymPhotoModal'].forEach((id) => {
+      ['settingsModal', 'clientModal', 'packageModal', 'gymPhotoModal', 'measurementsModal'].forEach((id) => {
         const m = document.getElementById(id);
         m.addEventListener('click', (e) => {
           if (e.target === m) m.classList.add('hidden');
@@ -6612,9 +7008,23 @@
           const id = hadBtn.dataset.pickHad;
           if (tempIssuesHad.includes(id)) {
             tempIssuesHad = tempIssuesHad.filter((x) => x !== id);
+            tempIssuesImproved = tempIssuesImproved.filter((x) => x !== id);
             tempIssuesResolved = tempIssuesResolved.filter((x) => x !== id);
           } else {
             tempIssuesHad.push(id);
+          }
+          renderClientIssuesPicker();
+          return;
+        }
+        const impBtn = e.target.closest('[data-pick-improved]');
+        if (impBtn) {
+          const id = impBtn.dataset.pickImproved;
+          if (tempIssuesImproved.includes(id)) {
+            tempIssuesImproved = tempIssuesImproved.filter((x) => x !== id);
+          } else {
+            tempIssuesImproved.push(id);
+            tempIssuesResolved = tempIssuesResolved.filter((x) => x !== id);
+            if (!tempIssuesHad.includes(id)) tempIssuesHad.push(id);
           }
           renderClientIssuesPicker();
           return;
@@ -6626,6 +7036,7 @@
             tempIssuesResolved = tempIssuesResolved.filter((x) => x !== id);
           } else {
             tempIssuesResolved.push(id);
+            tempIssuesImproved = tempIssuesImproved.filter((x) => x !== id);
             if (!tempIssuesHad.includes(id)) tempIssuesHad.push(id);
           }
           renderClientIssuesPicker();
@@ -6668,6 +7079,9 @@
         e.preventDefault();
         const editId = document.getElementById('editClientId').value.trim();
         const existing = editId ? showcaseClients.find((c) => c.id === editId) : null;
+        const cleanResolved = Array.from(new Set(tempIssuesResolved));
+        const cleanImproved = Array.from(new Set(tempIssuesImproved.filter((id) => !cleanResolved.includes(id))));
+
         const clientObj = {
           id: editId || 'cli_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
           isSample: false,
@@ -6675,12 +7089,16 @@
           name: document.getElementById('scName').value.trim(),
           status: document.getElementById('scStatus').value,
           duration: document.getElementById('scDuration').value.trim(),
+          sessionsTotal: Math.max(0, Number(document.getElementById('scSessionsTotal').value) || 0),
+          sessionsDone: Math.max(0, Number(document.getElementById('scSessionsDone').value) || 0),
           packageName: document.getElementById('scPackage').value.trim(),
           beforeState: document.getElementById('scBeforeState').value.trim(),
           transformation: document.getElementById('scTransformation').value.trim(),
           quote: document.getElementById('scQuote').value.trim(),
-          issuesHad: Array.from(new Set([...tempIssuesHad, ...tempIssuesResolved])),
-          issuesResolved: Array.from(new Set(tempIssuesResolved)),
+          issuesHad: Array.from(new Set([...tempIssuesHad, ...cleanImproved, ...cleanResolved])),
+          issuesImproved: cleanImproved,
+          issuesResolved: cleanResolved,
+          measurements: existing && Array.isArray(existing.measurements) ? existing.measurements : [],
           photoBefore: tempPhotoBefore,
           photoAfter: tempPhotoAfter,
         };
@@ -6699,10 +7117,36 @@
         showToast(editId ? 'Đã cập nhật hồ sơ học viên!' : 'Đã thêm học viên Showcase!');
       });
 
-      document.getElementById('showcaseClientList').addEventListener('click', (e) => {
+      document.getElementById('showcaseClientList').addEventListener('click', async (e) => {
         const lb = e.target.closest('[data-lightbox-src]');
         if (lb) {
           openLightbox(lb.dataset.lightboxSrc, lb.dataset.lightboxCap);
+          return;
+        }
+        const measureBtn = e.target.closest('[data-open-measure]');
+        if (measureBtn) {
+          openMeasurementsModal(measureBtn.dataset.openMeasure);
+          return;
+        }
+        const incBtn = e.target.closest('[data-inc-session]');
+        if (incBtn) {
+          const cli = showcaseClients.find((c) => c.id === incBtn.dataset.incSession);
+          if (!cli) return;
+          const updated = {
+            ...cli,
+            sessionsDone: (Number(cli.sessionsDone) || 0) + 1,
+          };
+          if (!cloudReady) {
+            showcaseClients = showcaseClients.map((c) => (c.id === updated.id ? updated : c));
+            renderShowcaseClients();
+          }
+          await cloudSaveDoc('showcase_clients', updated.id, updated);
+          const totalS = Number(updated.sessionsTotal) || 0;
+          showToast(
+            totalS > 0
+              ? `Đã chấm công: ${updated.sessionsDone}/${totalS} buổi (${updated.name})`
+              : `Đã chấm công: ${updated.sessionsDone} buổi (${updated.name})`
+          );
           return;
         }
         const editBtn = e.target.closest('[data-edit-client]');
@@ -6727,6 +7171,78 @@
           });
         }
       });
+
+      // Lưu đợt đo 7 chỉ số mới cho học viên
+      document.getElementById('measureForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const cli = showcaseClients.find((c) => c.id === activeMeasureClientId);
+        if (!cli) return;
+
+        const parseVal = (id) => {
+          const raw = document.getElementById(id).value.trim();
+          if (raw === '') return null;
+          const num = Number(raw);
+          return Number.isFinite(num) ? Math.round(num * 10) / 10 : null;
+        };
+
+        const entry = {
+          id: 'ms_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+          date: document.getElementById('mDate').value || new Date().toISOString().slice(0, 10),
+          label: document.getElementById('mLabel').value.trim(),
+          weight: parseVal('mWeight'),
+          chest: parseVal('mChest'),
+          waist: parseVal('mWaist'),
+          hip: parseVal('mHip'),
+          glute: parseVal('mGlute'),
+          thigh: parseVal('mThigh'),
+          arm: parseVal('mArm'),
+          createdAt: new Date().toISOString(),
+        };
+
+        const hasAny = BODY_METRICS.some((m) => entry[m.key] !== null);
+        if (!hasAny) {
+          showToast('Vui lòng nhập ít nhất 1 chỉ số đo!');
+          return;
+        }
+
+        const nextList = Array.isArray(cli.measurements) ? [...cli.measurements, entry] : [entry];
+        const updated = { ...cli, measurements: nextList };
+
+        if (!cloudReady) {
+          showcaseClients = showcaseClients.map((c) => (c.id === updated.id ? updated : c));
+          renderShowcaseClients();
+          renderMeasurementsModal();
+        }
+        await cloudSaveDoc('showcase_clients', updated.id, updated);
+
+        document.getElementById('mLabel').value = '';
+        ['mWeight', 'mChest', 'mWaist', 'mHip', 'mGlute', 'mThigh', 'mArm'].forEach((id) => {
+          document.getElementById(id).value = '';
+        });
+        showToast('Đã lưu & đồng bộ đợt đo mới!');
+      });
+
+      // Xóa một lần đo bị nhập nhầm
+      document.getElementById('measureHistoryList').addEventListener('click', (e) => {
+        const delBtn = e.target.closest('[data-del-measure]');
+        if (!delBtn) return;
+        const entryId = delBtn.dataset.delMeasure;
+        const cli = showcaseClients.find((c) => c.id === activeMeasureClientId);
+        if (!cli) return;
+
+        openConfirm('Xóa lần đo này?', 'Các chỉ số tổng hợp Buổi đầu → Hiện tại sẽ tự động tính lại.', 'Xóa', async () => {
+          const nextList = (cli.measurements || []).filter((en) => en.id !== entryId);
+          const updated = { ...cli, measurements: nextList };
+          if (!cloudReady) {
+            showcaseClients = showcaseClients.map((c) => (c.id === updated.id ? updated : c));
+            renderShowcaseClients();
+            renderMeasurementsModal();
+          }
+          await cloudSaveDoc('showcase_clients', updated.id, updated);
+          showToast('Đã xóa lần đo');
+        });
+      });
+
 
       // Gói tập PT
       document.getElementById('btnAddPackage').addEventListener('click', () => openPackageModal(null));
