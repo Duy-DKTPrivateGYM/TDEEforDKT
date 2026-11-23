@@ -1219,6 +1219,27 @@
     body.presentation-mode .admin-only {
       display: none !important;
     }
+     /* Phân quyền: Nhân viên / PT chỉ được tư vấn & show khách, không được sửa cấu hình phòng */
+    body.role-staff #btnOpenAppearance,
+    body.role-staff #btnBannerQuickEdit,
+    body.role-staff #btnEditPtStudio,
+    body.role-staff #btnAddGymPhoto,
+    body.role-staff #gymGalleryContainer .admin-only,
+    body.role-staff #btnAddPackage,
+    body.role-staff #packageList .admin-only,
+    body.role-staff #btnClearAllHistory,
+    body.role-staff [data-set-tab="setPanelBrand"],
+    body.role-staff [data-set-tab="setPanelBg"],
+    body.role-staff #btnExportJson,
+    body.role-staff #btnTriggerImportJson,
+    body.role-staff #btnSaveStaffAlias {
+      display: none !important;
+    }
+    body.role-staff #setStaffAlias {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
 
     .segmented-tabs {
       display: grid;
@@ -3127,7 +3148,7 @@
   </div>
 
   <!-- ==================== MÀN HÌNH KHÓA MÃ PIN NHÂN VIÊN ==================== -->
-  <div id="pinLockScreen" class="pin-lock-overlay hidden" role="dialog" aria-modal="true" aria-label="Đăng nhập mã PIN nhân viên">
+  <div id="pinLockScreen" class="pin-lock-overlay" role="dialog" aria-modal="true" aria-label="Đăng nhập mã PIN nhân viên">
     <div class="pin-lock-card">
       <div class="brand-badge" style="width:58px;height:58px;border-radius:16px;">
         <div class="brand-badge-inner" style="border-radius:14.5px;">
@@ -3533,7 +3554,49 @@
     let currentStaffRole = 'admin';
     let currentStaffPinId = '';
     let securityConfig = { enabled: false, staffPins: [] };
+    let securityLoadedFromCloud = false;
     let isAppUnlocked = false;
+    let hiddenSinceTs = 0;
+
+    // Đọc nhanh danh sách PIN đã mã hóa trong máy để mở bàn phím ngay trong 0 giây
+    try {
+      const cachedSec = JSON.parse(localStorage.getItem('dkt_sec_cache_v1') || 'null');
+      if (cachedSec && Array.isArray(cachedSec.staffPins)) {
+        securityConfig = {
+          enabled: Boolean(cachedSec.enabled),
+          staffPins: cachedSec.staffPins,
+        };
+      }
+    } catch (e) {}
+
+    function cacheSecurityConfig() {
+      try {
+        localStorage.setItem('dkt_sec_cache_v1', JSON.stringify(securityConfig));
+      } catch (e) {}
+    }
+
+    function applyRolePermissionsUI() {
+      const isStaffRestricted = isPinLockActive() && currentStaffRole === 'staff';
+      document.body.classList.toggle('role-staff', isStaffRestricted);
+    }
+
+    // Tự động khóa lại nếu thoát màn hình / chuyển sang Zalo quá 2 phút
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        hiddenSinceTs = Date.now();
+      } else if (hiddenSinceTs && Date.now() - hiddenSinceTs > 120000 && isPinLockActive() && isAppUnlocked) {
+        lockAppImmediately();
+      }
+    });
+
+    // An toàn: nếu mất mạng hoàn toàn quá 4 giây thì tự chuyển sang kiểm tra bộ nhớ máy
+    setTimeout(() => {
+      if (!securityLoadedFromCloud) {
+        securityLoadedFromCloud = true;
+        evaluatePinLockUI();
+      }
+    }, 4000);
+
     let pinInputBuffer = '';
     let pinFailCount = 0;
     let pinLockUntil = 0;
@@ -3611,35 +3674,54 @@
     function evaluatePinLockUI() {
       const lockScreen = document.getElementById('pinLockScreen');
       const headerLockBtn = document.getElementById('btnLockAppNow');
+      const errEl = document.getElementById('pinErrorMsg');
       const active = isPinLockActive();
 
-      if (!active) {
-        isAppUnlocked = true;
-        currentStaffRole = 'admin';
-        lockScreen.classList.add('hidden');
+      if (!securityLoadedFromCloud && !active) {
+        lockScreen.classList.remove('hidden');
         headerLockBtn.classList.add('hidden');
+        if (errEl && !errEl.textContent) {
+          errEl.textContent = 'Đang kết nối máy chủ kiểm tra mã PIN...';
+        }
         return;
       }
 
-      // Nếu nhân viên đang mở app bị chủ phòng xóa PIN từ xa -> tự động khóa lại ngay
-      if (isAppUnlocked && currentStaffPinId) {
-        const stillExists = securityConfig.staffPins.some((p) => p.id === currentStaffPinId);
-        if (!stillExists) {
-          isAppUnlocked = false;
-          currentStaffPinId = '';
-          pinInputBuffer = '';
-          showToast('Mã PIN của bạn đã bị thu hồi từ quản trị viên!');
-        }
+      if (!active) {
+        currentStaffRole = 'admin';
+        lockScreen.classList.add('hidden');
+        headerLockBtn.classList.add('hidden');
+        if (errEl && errEl.textContent.includes('Đang kết nối')) errEl.textContent = '';
+        applyRolePermissionsUI();
+        return;
       }
 
-      if (isAppUnlocked) {
+      if (errEl && errEl.textContent.includes('Đang kết nối')) errEl.textContent = '';
+
+      // Chỉ cho mở app khi đã nhập đúng 1 mã PIN đang còn hiệu lực
+      const matchedPin = currentStaffPinId
+        ? securityConfig.staffPins.find((p) => p.id === currentStaffPinId)
+        : null;
+
+      if (isAppUnlocked && !matchedPin) {
+        isAppUnlocked = false;
+        currentStaffPinId = '';
+        pinInputBuffer = '';
+        showToast('Mã PIN của bạn đã bị thu hồi từ quản trị viên!');
+      } else if (isAppUnlocked && matchedPin) {
+        currentStaffRole = matchedPin.role === 'staff' ? 'staff' : 'admin';
+        staffAlias = matchedPin.name || staffAlias;
+      }
+
+      if (isAppUnlocked && matchedPin) {
         lockScreen.classList.add('hidden');
         headerLockBtn.classList.remove('hidden');
       } else {
+        isAppUnlocked = false;
         lockScreen.classList.remove('hidden');
         headerLockBtn.classList.add('hidden');
         renderPinDotsUI();
       }
+      applyRolePermissionsUI();
     }
 
     function lockAppImmediately() {
@@ -3993,17 +4075,25 @@
       onSnapshot(
         getPublicDocRef('gym_config', 'security'),
         (snap) => {
+          securityLoadedFromCloud = true;
           if (snap.exists()) {
             const d = snap.data();
             securityConfig = {
               enabled: Boolean(d.enabled),
               staffPins: Array.isArray(d.staffPins) ? d.staffPins : [],
             };
-            renderPinSettingsUI();
-            evaluatePinLockUI();
+          } else {
+            securityConfig = { enabled: false, staffPins: [] };
           }
+          cacheSecurityConfig();
+          renderPinSettingsUI();
+          evaluatePinLockUI();
         },
-        (err) => console.error('Lỗi đồng bộ security:', err)
+        (err) => {
+          console.error('Lỗi đồng bộ security:', err);
+          securityLoadedFromCloud = true;
+          evaluatePinLockUI();
+        }
       );
     }
 
@@ -5621,6 +5711,9 @@
     }
 
     function openSettingsModal(initialPanel = 'setPanelBrand') {
+      if (isPinLockActive() && currentStaffRole === 'staff') {
+        initialPanel = 'setPanelBackup';
+      }
       document.getElementById('setGymName').value = brand.gymName;
       document.getElementById('setSubtitle').value = brand.subtitle;
       document.getElementById('setCoachName').value = brand.coachName;
